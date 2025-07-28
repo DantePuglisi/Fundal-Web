@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundal Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f9f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .page {
+            width: 100%;
+            max-width: 900px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        .page.active {
+            display: flex;
+        }
+        h2 {
+            color: #005f69;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+        .grid-item {
+            background-color: #f0f4f4;
+            border: 1px solid #d9e3e4;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .grid-item:hover, .grid-item.selected {
+            border-color: #008c99;
+            background-color: #e0f7fa;
+        }
+        .grid-item img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+        .grid-item p {
+            margin: 0;
+            color: #333;
+            font-size: 14px;
+        }
+        #factor-servicio-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #d9e3e4;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            display: none;
+        }
+        #factor-servicio-section h3 {
+            margin-top: 0;
+            color: #005f69;
+        }
+        #fs-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #008c99;
+            margin: 10px 0;
+        }
+        #fs-description {
+            font-size: 12px;
+            color: #666;
+            margin: 10px 0;
+        }
+        .btn-modify {
+            background: none;
+            border: 1px solid #008c99;
+            color: #008c99;
+            border-radius: 15px;
+            padding: 5px 15px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .form-container, .result-container {
+            width: 100%;
+            max-width: 700px;
+        }
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            width: 48%;
+        }
+        .form-group.full-width {
+            width: 100%;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            color: #005f69;
+            font-weight: bold;
+        }
+        .form-group input[type="text"], .form-group input[type="number"], .form-group select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .form-group .radio-group {
+            display: flex;
+            align-items: center;
+        }
+        .form-group .radio-group label {
+            margin: 0 15px 0 5px;
+            font-weight: normal;
+        }
+        .form-group.question-group {
+            flex-direction: row;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .form-group.question-group label:first-child {
+            width: 250px;
+        }
+        .conditional-field {
+            display: none;
+            width: 100%;
+        }
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-primary {
+            background-color: #008c99;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #fce4ec;
+            color: #c2185b;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+         .modify-modal-content {
+            max-width: 400px;
+            padding: 30px;
+        }
+        .modify-modal-content .icon {
+            font-size: 24px;
+            color: #f57c00;
+            background-color: #fff3e0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            margin: 0 auto 15px auto;
+        }
+        .modify-modal-content h3 {
+             color: #005f69;
+             margin-bottom: 20px;
+        }
+        .modify-modal-content input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .modal-button {
+            background-color: #f0f4f4;
+            border: 1px solid #d9e3e4;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .modal-button.selected {
+             border-color: #008c99;
+             background-color: #e0f7fa;
+        }
+        .result-layout {
+            display: flex;
+            width: 100%;
+            gap: 30px;
+        }
+        .result-image {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .result-image img {
+            max-width: 100%;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
+        .result-data {
+            flex: 2;
+        }
+        .result-data h3 {
+            color: #005f69;
+            border-bottom: 2px solid #e0f7fa;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table td {
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f4f4;
+        }
+        .data-table td:first-child {
+            font-weight: bold;
+            color: #333;
+            width: 250px;
+        }
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .advantage-item p {
+             font-size: 12px;
+             color: #005f69;
+             font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page1" class="page active">
+        <h2>Seleccione aplicación</h2>
+        <div class="grid-container">
+             <div class="grid-item" data-app="Extrusoras"><img src="https://i.imgur.com/uJgP81F.png" alt="Extrusoras"><p>Extrusoras</p></div>
+            <div class="grid-item" data-app="Trituradores"><img src="https://i.imgur.com/tYt3VdZ.png" alt="Trituradores"><p>Trituradores</p></div>
+            <div class="grid-item" data-app="Compresores"><img src="https://i.imgur.com/7bC4p3c.png" alt="Compresores"><p>Compresores</p></div>
+            <div class="grid-item" data-app="Cintas transportadoras"><img src="https://i.imgur.com/gK9pZkH.png" alt="Cintas transportadoras"><p>Cintas transportadoras</p></div>
+            <div class="grid-item" data-app="Sopladores y Ventiladores"><img src="https://i.imgur.com/0IeHw8j.png" alt="Sopladores y Ventiladores"><p>Sopladores y Ventiladores</p></div>
+            <div class="grid-item" data-app="Generadores"><img src="https://i.imgur.com/6EaWd8q.png" alt="Generadores"><p>Generadores</p></div>
+            <div class="grid-item" data-app="Guinches y puentes grúa"><img src="https://i.imgur.com/lJ4d4O7.png" alt="Guinches y puentes grúa"><p>Guinches y puentes grúa</p></div>
+            <div class="grid-item" data-app="Trenes de laminación"><img src="https://i.imgur.com/fL3s9dF.png" alt="Trenes de laminación"><p>Trenes de laminación</p></div>
+            <div class="grid-item" data-app="Bomba"><img src="https://i.imgur.com/eP4h1hS.png" alt="Bomba"><p>Bomba</p></div>
+            <div class="grid-item" data-app="Máquina motriz"><img src="https://i.imgur.com/XqT2J1A.png" alt="Máquina motriz"><p>Máquina motriz</p></div>
+        </div>
+        <div id="factor-servicio-section">
+            <h3 >Factor de servicio</h3>
+            <div id="fs-value">1.5</div>
+            <button id="modify-fs-btn" class="btn-modify">Modificar</button>
+            <p id="fs-description"></p>
+        </div>
+        <div class="button-container" style="justify-content: flex-end; margin-top: 40px;">
+             <button class="button btn-primary" onclick="goToPage('page2')">Continuar</button>
+        </div>
+    </div>
+
+    <div id="page2" class="page">
+        <h2>Ingrese las especificaciones de su equipo</h2>
+        <div class="form-container">
+             <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="equipo-id">Nombre / TAG / ID de su equipo:</label>
+                    <input type="text" id="equipo-id">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Potencia:</label>
+                    <div style="display: flex; align-items: center;">
+                       <input type="radio" id="hp" name="potencia_unit" value="Hp" checked> <label for="hp" style="margin-right: 10px;">Hp</label>
+                       <input type="radio" id="kw" name="potencia_unit" value="Kw"> <label for="kw">Kw</label>
+                       <input type="number" id="potencia" style="margin-left:10px; flex:1;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="velocidad">Velocidad (rpm):</label>
+                    <input type="number" id="velocidad">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="eje-conductor">Ø de eje conductor:</label>
+                    <input type="text" id="eje-conductor">
+                </div>
+                <div class="form-group">
+                    <label for="eje-conducido">Ø de eje conducido:</label>
+                    <input type="text" id="eje-conducido">
+                </div>
+            </div>
+            <hr style="width:100%; margin: 20px 0;">
+             <div class="form-group question-group">
+                <label>¿Tiene distanciador?</label>
+                <div class="radio-group">
+                    <input type="radio" id="distanciador_si" name="distanciador" value="SI" onclick="toggleConditional('distanciador-field', true)"> <label for="distanciador_si">SI</label>
+                    <input type="radio" id="distanciador_no" name="distanciador" value="NO" checked onclick="toggleConditional('distanciador-field', false)"> <label for="distanciador_no">NO</label>
+                </div>
+            </div>
+            <div id="distanciador-field" class="form-row conditional-field">
+                 <div class="form-group full-width">
+                    <label for="dbse">Indique el DBSE(mm):</label>
+                    <select id="dbse">
+                        <option value="">Seleccione...</option>
+                        <option>100</option>
+                        <option>140</option>
+                        <option>180</option>
+                    </select>
+                </div>
+            </div>
+             <div class="form-group question-group">
+                <label>¿Tiene Reductor?</label>
+                <div class="radio-group">
+                    <input type="radio" id="reductor_si" name="reductor" value="SI" onclick="toggleConditional('reductor-fields', true)"> <label for="reductor_si">SI</label>
+                    <input type="radio" id="reductor_no" name="reductor" value="NO" checked onclick="toggleConditional('reductor-fields', false)"> <label for="reductor_no">NO</label>
+                </div>
+            </div>
+             <div id="reductor-fields" class="conditional-field">
+                <div class="form-row">
+                    <div class="form-group">
+                         <label for="relacion-rpm">Relación de reducción:</label>
+                         <input type="text" id="relacion-rpm">
+                    </div>
+                     <div class="form-group">
+                         <label for="eje-salida-reductor">Ø de eje salida del reductor:</label>
+                         <input type="text" id="eje-salida-reductor">
+                     </div>
+                </div>
+             </div>
+             <div class="form-group question-group">
+                <label>¿Quiere acople con sistema fusible?</label>
+                <div class="radio-group">
+                    <input type="radio" id="fusible_si" name="fusible" value="SI"> <label for="fusible_si">SI</label>
+                    <input type="radio" id="fusible_no" name="fusible" value="NO" checked> <label for="fusible_no">NO</label>
+                </div>
+            </div>
+             <p style="text-align:center; font-size: 12px; color: #555; margin-top: 20px;">En caso de que su requerimiento no pueda ser seleccionado por este medio por favor comunicarse a ventas@fundaltransmisiones.com.aro</p>
+        </div>
+        <div class="button-container">
+            <button class="button btn-secondary" onclick="goToPage('page1')">Volver</button>
+            <button class="button btn-primary" onclick="goToPage('page3')">Continuar</button>
+        </div>
+    </div>
+
+    <div id="page3" class="page">
+        <h2>El acoplamiento ideal para su aplicación es:</h2>
+        <div class="result-layout">
+            <div class="result-image">
+                <img src="https://i.imgur.com/kPVA8z9.png" alt="Acoplamiento">
+                <h3 id="result-equipo-id" style="margin-top:15px;"></h3>
+                 <p style="font-size:14px; text-align: center; color: #555;">Acople LFR-4 con distanciador de 180mm</p>
+            </div>
+            <div class="result-data">
+                <h3>Datos proporcionados para el calculo</h3>
+                <table id="result-data-table" class="data-table">
+                    </table>
+
+                <h3 style="margin-top: 20px;">Ventajas de este acoplamiento para su aplicación:</h3>
+                <div class="advantages-grid">
+                    <div class="advantage-item"><p>Alta performance</p></div>
+                    <div class="advantage-item"><p>Vida útil prolongada</p></div>
+                    <div class="advantage-item"><p>Estabilidad dinámica</p></div>
+                    <div class="advantage-item"><p>Eficiencia</p></div>
+                    <div class="advantage-item"><p>Excelente respuesta elástica</p></div>
+                    <div class="advantage-item"><p>Mantenimiento fácil y rápido</p></div>
+                </div>
+            </div>
+        </div>
+         <div class="button-container" style="justify-content:space-around; flex-wrap: wrap; gap: 10px; margin-top:30px">
+            <button class="button btn-secondary" onclick="goToPage('page1')">Nueva selección</button>
+            <button class="button btn-secondary">Compartir</button>
+            <button class="button btn-secondary" onclick="goToPage('page2')">Modificar</button>
+            <button class="button btn-primary">Descargar</button>
+            <button class="button btn-primary">Cotizar</button>
+        </div>
+    </div>
+
+
+    <div id="fs-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title"></h2>
+            <p>Seleccione el factor de servicio</p>
+            <div id="modal-grid" class="modal-grid"></div>
+            <div class="button-container">
+                <button class="button btn-secondary" onclick="closeFsModal()">Volver</button>
+                <button class="button btn-primary" onclick="acceptFsModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modify-fs-modal" class="modal">
+        <div class="modal-content modify-modal-content">
+             <div class="icon">!</div>
+             <h3>Ingrese factor de servicio</h3>
+             <input type="number" id="manual-fs-input" step="0.01">
+             <div class="button-container">
+                <button class="button btn-secondary" onclick="closeModifyFsModal()">Cancelar</button>
+                <button class="button btn-primary" onclick="acceptModifyFsModal()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    const appData = {
+        "Sopladores y Ventiladores": [{ name: "Centrífugos", fs: "1.00" }, { name: "Turboventiladores", fs: "1.25" }, { name: "Torres de enfriamiento", fs: "2.50" }, { name: "Metálicos", fs: "1.25" }, { name: "Tiro forzado", fs: "1.50" }, { name: "Lóbulos", fs: "1.50" }, { name: "Tiro inducido", fs: "2.00" }],
+        "Bomba": [{ name: "Centrífuga", fs: "1.25" }, { name: "De proceso", fs: "1.50" }, { name: "Alternativa", fs: "2.00" }, { name: "Dosificadora", fs: "1.75" }],
+        "Extrusoras": [{ name: "Uso general", fs: "1.75" }, { name: "Servicio pesado", fs: "2.25" }],
+        "Trituradores": [{ name: "Mandíbula", fs: "2.50" }, { name: "Impacto", fs: "2.75" }],
+        "Compresores": [{ name: "Tornillo", fs: "1.50" }, { name: "Pistón", fs: "2.00" }, { name: "Centrífugo", fs: "1.25" }],
+        "Cintas transportadoras": [{ name: "Liviana", fs: "1.25" }, { name: "Pesada", fs: "1.75" }],
+        "Generadores": [{ name: "Uso contínuo", fs: "1.50" }, { name: "Standby", fs: "1.25" }],
+        "Guinches y puentes grúa": [{ name: "Uso liviano", fs: "1.75" }, { name: "Uso pesado", fs: "2.50" }],
+        "Trenes de laminación": [{ name: "En caliente", fs: "2.50" }, { name: "En frío", fs: "2.00" }],
+        "Máquina motriz": [{ name: "Motor eléctrico", fs: "1.00" }, { name: "Motor combustión", fs: "1.50" }]
+    };
+
+    let selectedFS = null;
+    let selectedAppName = '';
+    let selectedSubCategoryName = '';
+
+    const fsModal = document.getElementById('fs-modal');
+    const modifyFsModal = document.getElementById('modify-fs-modal');
+    const factorSection = document.getElementById('factor-servicio-section');
+
+    document.querySelectorAll('.grid-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectedAppName = item.dataset.app;
+            const subcategories = appData[selectedAppName] || [];
+
+            document.querySelectorAll('.grid-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+
+            document.getElementById('modal-title').textContent = selectedAppName.toUpperCase();
+            const modalGrid = document.getElementById('modal-grid');
+            modalGrid.innerHTML = '';
+            subcategories.forEach(sub => {
+                const btn = document.createElement('button');
+                btn.className = 'modal-button';
+                btn.textContent = `${sub.name} - FS(A) ${sub.fs}`;
+                btn.dataset.fs = sub.fs;
+                btn.dataset.name = sub.name;
+                btn.onclick = () => {
+                    selectedFS = sub.fs;
+                    selectedSubCategoryName = sub.name;
+                    document.querySelectorAll('.modal-button').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                };
+                modalGrid.appendChild(btn);
+            });
+            fsModal.style.display = 'block';
+        });
+    });
+
+    function closeFsModal() {
+        fsModal.style.display = 'none';
+        selectedFS = null;
+    }
+
+    function acceptFsModal() {
+        if (selectedFS) {
+            fsModal.style.display = 'none';
+            document.getElementById('fs-value').textContent = selectedFS;
+            document.getElementById('fs-description').innerHTML = `Para la aplicación "${selectedAppName} - ${selectedSubCategoryName}" se recomienda este factor de servicio. <br>Si necesita un factor de servicio mayor, puede ingresarlo manualmente a través del botón "modificar".`;
+            factorSection.style.display = 'block';
+        } else {
+            alert('Por favor, seleccione un factor de servicio.');
+        }
+    }
+
+    document.getElementById('modify-fs-btn').onclick = () => {
+        document.getElementById('manual-fs-input').value = document.getElementById('fs-value').textContent;
+        modifyFsModal.style.display = 'block';
+    }
+
+    function closeModifyFsModal() {
+        modifyFsModal.style.display = 'none';
+    }
+
+    function acceptModifyFsModal() {
+        const newValue = document.getElementById('manual-fs-input').value;
+        if (newValue) {
+            selectedFS = newValue;
+            document.getElementById('fs-value').textContent = newValue;
+            modifyFsModal.style.display = 'none';
+        } else {
+            alert('Por favor, ingrese un valor.');
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target == fsModal) closeFsModal();
+        if (event.target == modifyFsModal) closeModifyFsModal();
+    }
+
+    function goToPage(pageId) {
+        if (pageId === 'page3') {
+            populateResults();
+        }
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        window.scrollTo(0, 0);
+    }
+    
+    function populateResults() {
+        const table = document.getElementById('result-data-table');
+        table.innerHTML = ''; // Clear previous results
+
+        const equipoId = document.getElementById('equipo-id').value || 'No especificado';
+        document.getElementById('result-equipo-id').textContent = equipoId;
+
+        const data = {
+            "Aplicación:": `${selectedAppName} - ${selectedSubCategoryName}`,
+            "Factor de servicio resultante:": selectedFS || 'No seleccionado',
+            "Potencia:": `${document.getElementById('potencia').value || 'N/A'} ${document.querySelector('input[name="potencia_unit"]:checked').value}`,
+            "Velocidad (rpm):": document.getElementById('velocidad').value || 'N/A',
+            "Ø de eje conductor:": document.getElementById('eje-conductor').value || 'N/A',
+            "Ø de eje conducido:": document.getElementById('eje-conducido').value || 'N/A',
+        };
+
+        for (const [key, value] of Object.entries(data)) {
+            const row = table.insertRow();
+            row.insertCell(0).textContent = key;
+            row.insertCell(1).textContent = value;
+        }
+
+        const tieneDistanciador = document.querySelector('input[name="distanciador"]:checked').value;
+        const distRow = table.insertRow();
+        distRow.insertCell(0).textContent = '¿Tiene distanciador?';
+        distRow.insertCell(1).textContent = tieneDistanciador;
+        if (tieneDistanciador === 'SI') {
+            const dbseRow = table.insertRow();
+            dbseRow.insertCell(0).textContent = 'DBSE (mm):';
+            dbseRow.insertCell(1).textContent = document.getElementById('dbse').value || 'N/A';
+        }
+
+        const tieneReductor = document.querySelector('input[name="reductor"]:checked').value;
+        const redRow = table.insertRow();
+        redRow.insertCell(0).textContent = '¿Tiene Reductor?';
+        redRow.insertCell(1).textContent = tieneReductor;
+        if (tieneReductor === 'SI') {
+            const relRow = table.insertRow();
+            relRow.insertCell(0).textContent = 'Relación de reducción:';
+            relRow.insertCell(1).textContent = document.getElementById('relacion-rpm').value || 'N/A';
+            const ejeSalidaRow = table.insertRow();
+            ejeSalidaRow.insertCell(0).textContent = 'Ø de eje salida del reductor:';
+            ejeSalidaRow.insertCell(1).textContent = document.getElementById('eje-salida-reductor').value || 'N/A';
+        }
+
+        const tieneFusible = document.querySelector('input[name="fusible"]:checked').value;
+        const fusibleRow = table.insertRow();
+        fusibleRow.insertCell(0).textContent = '¿Quiere acople con sistema fusible?';
+        fusibleRow.insertCell(1).textContent = tieneFusible;
+
+    }
+
+    function toggleConditional(elementId, show) {
+        const element = document.getElementById(elementId);
+        element.style.display = show ? 'flex' : 'none';
+    }
+</script>
+
+</body>
+</html>
