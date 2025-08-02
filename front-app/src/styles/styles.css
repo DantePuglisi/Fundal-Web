@@ -1,0 +1,7 @@
+/* This file should be processed by Tailwind CSS before use */
+/* 
+@tailwind components;
+@tailwind utilities;
+@import "tailwindcss/preflight"; */
+
+@import "tailwindcss";
