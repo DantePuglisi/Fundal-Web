@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import app_data from "../data";
 import Card from "./card";
 import SopladoresVentiladores from "./appsComponents/SopladoresVentiladores";
 
 function Cards() {
     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
 
     const handleCardClick = (id: number) => {
         if (id === 5) setShowModal(true);
+        else navigate(`/app/${id}`);
     };
     const closeModal = () => {
         setShowModal(false);

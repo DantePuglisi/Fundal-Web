@@ -1,0 +1,221 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Toggle from "../toggle";
+import type EspecificacionesForm from '../../interfaces/all_interfaces';
+import type DistanciadorForm from '../../interfaces/all_interfaces';
+import type ReductorForm from '../../interfaces/all_interfaces';
+
+function Form() {
+    const navigate = useNavigate();
+    const [form, setForm] = useState<EspecificacionesForm>({
+        name_tag_id: "",
+        hp_or_kw: true,
+        potencia: 0,
+        velocidad_rpm: "",
+        eje_conductor: "",
+        eje_conducido: "",
+        distanciador: false,
+        reductor: false,
+        acople: false
+    });
+
+    const [distanciador, setDistanciador] = useState<DistanciadorForm>({
+        dbse: ""
+    });
+
+    const [reductor, setReductor] = useState<ReductorForm>({
+        relacion_npm: "",
+        eje_salida: "",
+        eje_conducido: ""
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = type === "checkbox" || type === "radio" ? (e.target as HTMLInputElement).checked : undefined;
+    setForm((prev: EspecificacionesForm) => ({
+        ...prev,
+        [name]: type === "checkbox" || type === "radio" ? checked : value
+    }));
+};
+
+    return (
+        <div className="flex items-center justify-center bg-opacity-40 mt-[-25px] mb-7">
+            <form className="bg-[#F1F1F1] rounded-3xl px-10 py-8 w-full max-w-4xl shadow-lg overflow-y-auto max-h-[90vh]">
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="col-span-2">
+                        <label className="block mb-1 font-medium">Nombre / TAG / ID de su equipo:</label>
+                        <input
+                            type="text"
+                            name="name_tag_id"
+                            value={form.name_tag_id}
+                            onChange={handleChange}
+                            className="w-full bg-white rounded-md px-3 py-2 shadow"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1 font-medium">Potencia:</label>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-black-700">Hp</span>
+                            <Toggle
+                                checked={form.hp_or_kw}
+                                onChange={val => setForm(prev => ({ ...prev, hp_or_kw: val }))}
+                                id="hp-or-kw-toggle"
+                            />
+                            <span className="text-sm font-bold text-black-700">Kw</span>
+                            <input
+                                type="number"
+                                name="potencia"
+                                value={form.potencia}
+                                onChange={handleChange}
+                                className="w-20 bg-white rounded-md px-2 py-2 shadow"
+                            />
+                            
+                        </div>
+                    </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label className="block mb-1 font-medium">Velocidad (rpm):</label>
+                        <input
+                            type="text"
+                            name="velocidad"
+                            value={form.velocidad_rpm}
+                            onChange={handleChange}
+                            className="w-full bg-white rounded-md px-3 py-2 shadow"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1 font-medium">Ø de eje conductor:</label>
+                        <input
+                            type="text"
+                            name="ejeConductor"
+                            value={form.eje_conductor}
+                            onChange={handleChange}
+                            className="w-full bg-white rounded-md px-3 py-2 shadow"
+                        />
+                    </div>
+                    <div>
+                        <label className="block mb-1 font-medium">Ø de eje conducido:</label>
+                        <input
+                            type="text"
+                            name="ejeConducido"
+                            value={form.eje_conducido}
+                            onChange={handleChange}
+                            className="w-full bg-white rounded-md px-3 py-2 shadow"
+                        />
+                    </div>
+                </div>
+                {/* Distanciador */}
+                    <div className="grid grid-cols-3 gap-4 mb-4 items-center">
+                    <div>
+                        <label className="block mb-1 font-medium">¿Tiene distanciador?</label>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-black-700">NO</span>
+                            <Toggle
+                                checked={form.distanciador}
+                                onChange={val => setForm(prev => ({ ...prev, distanciador: val }))}
+                                
+                            />
+                            <span className="text-sm font-bold text-black-700">SÍ</span>
+                        </div>
+                    </div>
+                    {form.distanciador && (
+                        <div className="col-span-2">
+                            <label className="block mb-1 font-medium">Indique el DBSE (mm):</label>
+                            <input
+                                type="text"
+                                name="dbse"
+                                value={distanciador.dbse}
+                                onChange={e => setDistanciador({ ...distanciador, dbse: e.target.value })}
+                                className="w-full bg-white rounded-md px-3 py-2 shadow"
+                            />
+                        </div>
+                    )}
+                </div>
+                {/* Reductor */}
+                <div className="grid grid-cols-3 gap-4 mb-4 items-center">
+                    <div>
+                        <label className="block mb-1 font-medium">¿Tiene Reductor?</label>
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-black-700">NO</span>
+                            <Toggle
+                                checked={form.reductor}
+                                onChange={val => setForm(prev => ({ ...prev, reductor: val }))}
+                                
+                                id="reductor-toggle"
+                        />
+                        <span className="text-sm font-bold text-black-700">SÍ</span>
+                        </div>
+                    </div>
+                    {form.reductor && (
+                        <>
+                            <div>
+                                <label className="block mb-1 font-medium">Relación (rpm):</label>
+                                <input
+                                    type="text"
+                                    name="relacion"
+                                    value={reductor.relacion_npm}
+                                    onChange={e => setReductor({ ...reductor, relacion_npm: e.target.value })}
+                                    className="w-full bg-white rounded-md px-3 py-2 shadow"
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-1 font-medium">Ø de eje salida del reductor:</label>
+                                <input
+                                    type="text"
+                                    name="ejeSalida"
+                                    value={reductor.eje_salida}
+                                    onChange={e => setReductor({ ...reductor, eje_salida: e.target.value })}
+                                    className="w-full bg-white rounded-md px-3 py-2 shadow"
+                                />
+                            </div>
+                            <div>
+                                <label className="block mb-1 font-medium">Ø de eje conducido:</label>
+                                <input
+                                    type="text"
+                                    name="ejeConducido"
+                                    value={reductor.eje_conducido}
+                                    onChange={e => setReductor({ ...reductor, eje_conducido: e.target.value })}
+                                    className="w-full bg-white rounded-md px-3 py-2 shadow"
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+                {/* Acople fusible */}
+                <div className="mb-4">
+                    <label className="block mb-1 font-medium">¿Quiere acople con sistema fusible?</label>
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-black-700">NO</span>
+                        <Toggle
+                            checked={form.acople}
+                            onChange={val => setForm(prev => ({ ...prev, acople: val }))}
+                            id="acople-toggle"
+                        />
+                        <span className="text-sm font-bold text-black-700">SÍ</span>
+                    </div>
+                </div>
+                <p className="text-center text-gray-500 text-sm mb-6">
+                    En caso de que su requerimiento no pueda ser seleccionado por este medio por favor comunicarse a ventas@fundaltransmisiones.com.ar
+                </p>
+                <div className="flex justify-between mt-6">
+                    <button
+                        type="button"
+                        className="bg-red-100 text-red-600 font-bold py-2 px-8 rounded-full hover:cursor-pointer"
+                        onClick={() => navigate('/')}
+                    >
+                        Volver
+                    </button>
+                    <button
+                        type="submit"
+                        className="bg-teal-900 text-white font-bold py-2 px-8 rounded-full hover:bg-teal-800"
+                    >
+                        Continuar
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}
+
+export default Form;
