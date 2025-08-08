@@ -17,19 +17,18 @@ function Cards() {
     };
     return (
         <div>
-            <div className="grid grid-cols-5 md:grid-cols-5 gap-10">
-                {app_data.map((item, index) => (
-                    <div key={index} onClick={() => handleCardClick(item.id)}>
-                        <Card title={item.title} icon={item.icon} />
-                    </div>
-                ))}
-                
-            </div>
-            <hr className="mt-10 mx-auto w-1/2 border-gray-600" />
-            {showModal && (
-                <SopladoresVentiladores icon={app_data.find(item => item.id === 5)?.icon} onClose={() => setShowModal(false)} />
-            )}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
+            {app_data.map((item, index) => (
+                <div key={index} onClick={() => handleCardClick(item.id)}>
+                    <Card title={item.title} icon={item.icon} />
+                </div>
+            ))}
         </div>
+        <hr className="mt-10 mx-auto w-1/2 border-gray-600" />
+        {showModal && (
+            <SopladoresVentiladores icon={app_data.find(item => item.id === 5)?.icon} onClose={() => setShowModal(false)} />
+        )}
+    </div>
          
     );
 }

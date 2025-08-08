@@ -8,7 +8,7 @@ function Card({ title, icon }: CardInterface) {
             }}
         >
             <img src={icon} alt={title} className="w-16 h-16 mb-2" />
-            <h2 className="text-center text-gray-800">{title}</h2>
+            <h2 className="text-center text-gray-800 font-semibold" style={{ fontFamily: 'Poppins' }}>{title}</h2>
         </div>
     );
 }
