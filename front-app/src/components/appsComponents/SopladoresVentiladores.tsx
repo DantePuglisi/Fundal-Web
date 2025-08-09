@@ -9,7 +9,7 @@ function SopladoresVentiladores({ onClose, icon }: Props ) {
         <div className="fixed inset-0 flex items-center justify-center z-50"
             style={{ backgroundColor: "rgba(168, 168, 168, 0.411)" }}>
             <div className="bg-white rounded-3xl px-3 py-6 sm:px-7 sm:py-10 w-full max-w-lg sm:max-w-2xl md:max-w-3xl lg:max-w-4xl shadow-lg relative mx-2">
-                <div className="flex bg-[#E6F2F2] justify-center -mt-10 mb-4 rounded-4xl w-16 h-16 mx-auto p-0.5">
+                <div className="flex bg-[#E6F2F2] justify-center sm:-mt-18 -mt-14 mb-4 rounded-4xl w-16 h-16 mx-auto p-0.5">
                     <img src={icon} alt="Sopladores y Ventiladores" className="w-16 h-16" />
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-center mb-2 text-teal-900" style={{ fontFamily: 'Poppins' }}>SOPLADORES Y VENTILADORES</h2>

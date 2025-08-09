@@ -2,6 +2,17 @@ export type CardInterface = {
     title: string;
 }
 
+export type FactorServiceResult = {
+    id:number
+    value:number
+}
+
+export type FactorService = {
+    id: number;
+    name: string;
+    value: number;
+};
+
 export type EspecificacionesForm = {
     name_tag_id:string;
     hp_or_kw:boolean;
