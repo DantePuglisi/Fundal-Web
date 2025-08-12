@@ -9,7 +9,7 @@ export default defineConfig(({ command }) => {
       react(),
       tailwindcss(),
     ],
-    // Use different base path for development vs production
+    // Use root path for GitHub Pages since we're deploying from front-app directory
     base: command === 'serve' ? '/' : '/Fundal-Web/',
     build: {
       rollupOptions: {
@@ -21,6 +21,7 @@ export default defineConfig(({ command }) => {
         },
       },
       chunkSizeWarningLimit: 1000,
+      outDir: 'dist',
     },
     server: {
       port: 5173,
