@@ -1,4 +1,4 @@
-import type CardInterface from "../interfaces/all_interfaces";
+import type { CardInterface } from "../interfaces/all_interfaces";
 
 function Card({ title, icon }: CardInterface) {
     return (

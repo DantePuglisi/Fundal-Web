@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Toggle from "../toggle";
-import type EspecificacionesForm from '../../interfaces/all_interfaces';
-import type DistanciadorForm from '../../interfaces/all_interfaces';
-import type ReductorForm from '../../interfaces/all_interfaces';
+import type { EspecificacionesForm, DistanciadorForm, ReductorForm } from '../../interfaces/all_interfaces';
 
 function Form() {
     const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
     const [form, setForm] = useState<EspecificacionesForm>({
         name_tag_id: "",
         hp_or_kw: true,
@@ -38,14 +37,52 @@ function Form() {
         }));
     };
 
+    const validateForm = () => {
+        const errors: string[] = [];
+        
+        // Campos siempre requeridos (campos básicos)
+        if (!form.name_tag_id.trim()) errors.push("Nombre/TAG/ID es requerido");
+        if (form.potencia <= 0) errors.push("La potencia debe ser mayor a 0");
+        if (!form.velocidad_rpm.trim()) errors.push("La velocidad (RPM) es requerida");
+        if (!form.eje_conductor.trim()) errors.push("El diámetro del eje conductor es requerido");
+        if (!form.eje_conducido.trim()) errors.push("El diámetro del eje conducido es requerido");
+        
+        // Solo validar DBSE si "Tiene distanciador" está en "SÍ"
+        if (form.distanciador && !distanciador.dbse.trim()) {
+            errors.push("DBSE es requerido cuando tiene distanciador");
+        }
+        
+        // Solo validar campos de reductor si "Tiene Reductor" está en "SÍ"
+        if (form.reductor) {
+            if (!reductor.relacion_npm.trim()) errors.push("Relación de reducción es requerida cuando tiene reductor");
+            if (!reductor.eje_salida.trim()) errors.push("Diámetro del eje de salida del reductor es requerido cuando tiene reductor");
+            if (!reductor.eje_conducido.trim()) errors.push("Diámetro del eje conducido del reductor es requerido cuando tiene reductor");
+        }
+        
+        if (errors.length > 0) {
+            alert("Por favor complete los siguientes campos:\n\n" + errors.join("\n"));
+            return false;
+        }
+        
+        return true;
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (form.acople === true) {
-            navigate('/acoplamiento');
-        } else {
-            // Aquí puedes poner la lógica para el caso contrario
-            navigate('/app/' + form.name_tag_id);
+        
+        if (!validateForm()) {
+            return;
         }
+        
+        const formData = {
+            especificaciones: form,
+            distanciador: form.distanciador ? distanciador : undefined,
+            reductor: form.reductor ? reductor : undefined,
+            applicationId: id ? parseInt(id) : undefined
+        };
+        
+        // Siempre navegar a los resultados, independientemente del estado del acople fusible
+        navigate('/acoplamiento', { state: formData });
     };
 
     return (
@@ -69,7 +106,7 @@ function Form() {
                         <div>
                             <label className="block mb-1 font-medium" style={{ fontFamily: 'Poppins' }}>Potencia:</label>
                             <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-sm font-bold text-black-700" style={{ fontFamily: 'Poppins' }}>Hp</span>
+                                <span className="text-sm font-bold text-black-700" style={{ fontFamily: 'Poppins' }}>HP</span>
                                 <Toggle
                                     checked={form.hp_or_kw}
                                     onChange={val => setForm(prev => ({ ...prev, hp_or_kw: val }))}
@@ -181,7 +218,7 @@ function Form() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block mb-1 font-medium" style={{ fontFamily: 'Poppins' }}>Ø de eje conducido:</label>
+                                    <label className="block mb-1 font-medium" style={{ fontFamily: 'Poppins' }}>Ø de eje conducido del reductor:</label>
                                     <input
                                         type="text"
                                         name="ejeConducido"
@@ -206,7 +243,7 @@ function Form() {
                             <span className="text-sm font-bold text-black-700" style={{ fontFamily: 'Poppins' }}>SÍ</span>
                         </div>
                     </div>
-                    <p className="text-center text-gray-500 text-sm mb-6 mt-6" style={{ fontFamily: 'Poppins' }}>
+                    <p className="text-center text-gray-500 text-sm mb-6" style={{ fontFamily: 'Poppins' }}>
                         En caso de que su requerimiento no pueda ser seleccionado por este medio por favor comunicarse a ventas@fundaltransmisiones.com.ar
                     </p>
                     <div className="flex flex-col sm:flex-row justify-between mt-6 gap-4">

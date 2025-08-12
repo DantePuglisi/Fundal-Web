@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type FactorService from '../../interfaces/all_interfaces';
+import type { FactorService } from '../interfaces/all_interfaces';
 import app_data from "../data";
 import Card from "./card";
 import SopladoresVentiladores from "./appsComponents/SopladoresVentiladores";
@@ -13,9 +13,6 @@ function Cards() {
     const handleCardClick = (id: number) => {
         if (id === 5) setShowModal(true);
         else navigate(`/app/${id}`);
-    };
-    const closeModal = () => {
-        setShowModal(false);
     };
     return (
         <div>
@@ -36,14 +33,14 @@ function Cards() {
                     <input
                         type="number"
                         className="bg-[#E9EFEF] rounded-md w-32 h-10 flex items-center justify-center mx-auto text-center text-xl text-gray-700 font-bold outline-none"
-                        value={factorService.value}
-                        onChange={e => setFactorService({ ...factorService, value: e.target.value })}
+                        value={factorService !== '-' ? factorService.value : ''}
+                        onChange={e => setFactorService(factorService !== '-' ? { ...factorService, value: parseFloat(e.target.value) } : { id: 1, name: 'manual', value: parseFloat(e.target.value) })}
                         placeholder="-"
                     />
                 </div>
             </div>
             {showModal && (
-                <SopladoresVentiladores icon={app_data.find(item => item.id === 5)?.icon} onClose={() => setShowModal(false)} />
+                <SopladoresVentiladores icon={app_data.find(item => item.id === 5)?.icon || ''} onClose={() => setShowModal(false)} />
             )}
         </div>
          

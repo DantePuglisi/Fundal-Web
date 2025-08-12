@@ -1,5 +1,6 @@
 export type CardInterface = {
     title: string;
+    icon: string;
 }
 
 export type FactorServiceResult = {
