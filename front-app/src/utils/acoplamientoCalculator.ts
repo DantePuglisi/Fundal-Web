@@ -215,104 +215,150 @@ function determineCouplingType(params: {
   // Include coupling model information if available
   const modelName = selectedCoupling ? ` - Modelo ${selectedCoupling.model}` : '';
   
-  // Fusible coupling types
-  if (hasFusible) {
-    if (serviceFactor > 2.5 || powerHP > 200) {
-      return {
-        id: 8,
-        name: `Acoplamiento Fusible de Alta Potencia FA-FUS${modelName}`,
-        image: "/Acoples render/8.png",
-        description: "Acoplamiento fusible diseñado para aplicaciones de alta potencia con protección contra sobrecargas extremas.",
-        ventajas: [
-          "Protección fusible contra sobrecargas extremas",
-          "Diseñado para altas potencias",
-          "Excelente absorción de vibraciones",
-          "Mantenimiento preventivo simplificado"
-        ]
-      };
-    } else {
-      return {
-        id: 2,
-        name: "Acoplamiento Fusible Estándar FA-FUS",
-        image: "/Acoples render/2.png",
-        description: "Acoplamiento fusible para aplicaciones estándar con protección confiable contra sobrecargas.",
-        ventajas: [
-          "Protección fusible confiable",
-          "Instalación sencilla",
-          "Costo-efectivo",
-          "Mantenimiento mínimo"
-        ]
-      };
+  // Determine image based on coupling series and characteristics
+  let couplingImage = "/Acoples render/FA.png"; // Default FA series
+  let couplingName = "Acoplamiento FUNDAL FA";
+  let couplingDescription = "Acoplamiento flexible estándar para transmisión de potencia industrial.";
+  let couplingAdvantages = [
+    "Alta performance operacional",
+    "Vida útil prolongada",
+    "Estabilidad dinámica",
+    "Eficiencia en la transmisión de potencia"
+  ];
+
+  // Determine coupling type based on selected model or characteristics
+  if (selectedCoupling) {
+    const series = selectedCoupling.series;
+    
+    switch (series) {
+      case 'FA':
+        couplingImage = "/Acoples render/FA.png";
+        couplingName = `Acoplamiento FUNDAL FA${modelName}`;
+        couplingDescription = "Acoplamiento flexible estándar FUNDAL FA para transmisión confiable de potencia en aplicaciones industriales.";
+        couplingAdvantages = [
+          "Alta performance operacional",
+          "Vida útil prolongada",
+          "Estabilidad dinámica excepcional",
+          "Eficiencia máxima en transmisión"
+        ];
+        break;
+        
+      case 'FA/D':
+        couplingImage = "/Acoples render/FA-D.png";
+        couplingName = `Acoplamiento con Distanciador FA/D${modelName}`;
+        couplingDescription = "Acoplamiento FUNDAL FA/D con distanciador para aplicaciones que requieren separación entre ejes.";
+        couplingAdvantages = [
+          "Compensación de desalineamientos",
+          "Flexibilidad de instalación",
+          "Fácil acceso para mantenimiento",
+          "Transmisión suave de potencia"
+        ];
+        break;
+        
+      case 'FA/C':
+        couplingImage = "/Acoples render/FA-C.png";
+        couplingName = `Acoplamiento Cardánico FA/C${modelName}`;
+        couplingDescription = "Acoplamiento FUNDAL FA/C con cardán para aplicaciones con grandes desalineamientos angulares.";
+        couplingAdvantages = [
+          "Permite desalineamientos angulares",
+          "Transmisión directa de movimiento",
+          "Diseño robusto y confiable",
+          "Ideal para aplicaciones especiales"
+        ];
+        break;
+        
+      case 'FA/FUS':
+        couplingImage = "/Acoples render/FA-FUS.png";
+        couplingName = `Acoplamiento Fusible FA/FUS${modelName}`;
+        couplingDescription = "Acoplamiento FUNDAL FA/FUS con protección fusible para evitar daños por sobrecargas.";
+        couplingAdvantages = [
+          "Protección fusible contra sobrecargas",
+          "Previene daños en equipos",
+          "Mantenimiento preventivo simplificado",
+          "Seguridad operacional máxima"
+        ];
+        break;
+        
+      case 'FAS NG':
+        if (selectedCoupling.torqueNm > 50000) {
+          couplingImage = "/Acoples render/FAS-NG-H.png";
+          couplingName = `Acoplamiento FAS NG Heavy Duty${modelName}`;
+          couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación para aplicaciones de alta potencia.";
+        } else {
+          couplingImage = "/Acoples render/FAS-NG.png";
+          couplingName = `Acoplamiento FAS NG${modelName}`;
+          couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación con tecnología avanzada.";
+        }
+        couplingAdvantages = [
+          "Tecnología de nueva generación",
+          "Mayor capacidad de transmisión",
+          "Sin necesidad de lubricación",
+          "Facilidad de mantenimiento exceptional"
+        ];
+        break;
+        
+      case 'FAS NG-LP':
+        if (hasFusible) {
+          couplingImage = "/Acoples render/FAS-NG-LP-FUS.png";
+          couplingName = `Acoplamiento FAS NG-LP con Fusible${modelName}`;
+          couplingDescription = "Acoplamiento FUNDAL FAS NG-LP de gran potencia con protección fusible integrada.";
+        } else {
+          couplingImage = "/Acoples render/FAS-NG-LP.png";
+          couplingName = `Acoplamiento FAS NG-LP${modelName}`;
+          couplingDescription = "Acoplamiento FUNDAL FAS NG-LP para aplicaciones de gran potencia y torque elevado.";
+        }
+        couplingAdvantages = [
+          "Diseño para grandes potencias",
+          "Capacidad de torque excepcional",
+          "Robustez y alta rentabilidad",
+          "Diseño compacto y liviano"
+        ];
+        break;
+        
+      default:
+        // Keep default values
+        break;
+    }
+  } else {
+    // Fallback logic when no specific coupling is selected
+    if (hasFusible) {
+      couplingImage = "/Acoples render/FA-FUS.png";
+      couplingName = "Acoplamiento Fusible FA-FUS";
+      couplingDescription = "Acoplamiento fusible recomendado para protección contra sobrecargas.";
+      couplingAdvantages = [
+        "Protección fusible confiable",
+        "Previene daños por sobrecarga",
+        "Instalación sencilla",
+        "Mantenimiento mínimo"
+      ];
+    } else if (hasDistanciador) {
+      couplingImage = "/Acoples render/FA-D.png";
+      couplingName = "Acoplamiento con Distanciador FA-D";
+      couplingDescription = "Acoplamiento con distanciador para separación entre ejes.";
+      couplingAdvantages = [
+        "Compensación de desalineamientos",
+        "Flexibilidad de instalación",
+        "Fácil acceso para mantenimiento",
+        "Transmisión suave de potencia"
+      ];
+    } else if (powerHP > 500 || serviceFactor > 2.5) {
+      couplingImage = "/Acoples render/FAS-NG.png";
+      couplingName = "Acoplamiento FAS NG";
+      couplingDescription = "Acoplamiento de nueva generación para altas potencias y factores de servicio elevados.";
+      couplingAdvantages = [
+        "Tecnología avanzada",
+        "Mayor capacidad de transmisión",
+        "Sin necesidad de lubricación",
+        "Mantenimiento simplificado"
+      ];
     }
   }
   
-  // Standard coupling types based on service factor and power
-  if (serviceFactor > 3.0) {
-    return {
-      id: 7,
-      name: "Acoplamiento de Alta Resistencia FA-HR",
-      image: "/Acoples render/7.png",
-      description: "Acoplamiento de alta resistencia para aplicaciones extremas con cargas variables severas.",
-      ventajas: [
-        "Máxima resistencia a cargas extremas",
-        "Vida útil excepcional",
-        "Absorción superior de choques",
-        "Diseño robusto para trabajo pesado"
-      ]
-    };
-  } else if (serviceFactor > 2.0) {
-    return {
-      id: 6,
-      name: "Acoplamiento de Trabajo Pesado FA-HD",
-      image: "/Acoples render/6.png",
-      description: "Acoplamiento robusto para aplicaciones de trabajo pesado con cargas variables moderadas.",
-      ventajas: [
-        "Construcción robusta",
-        "Excelente absorción de vibraciones",
-        "Resistencia a cargas variables",
-        "Mantenimiento reducido"
-      ]
-    };
-  } else if (serviceFactor > 1.5) {
-    if (hasDistanciador) {
-      return {
-        id: 5,
-        name: "Acoplamiento con Distanciador FA-D",
-        image: "/Acoples render/5.png",
-        description: "Acoplamiento estándar con distanciador para aplicaciones que requieren separación entre ejes.",
-        ventajas: [
-          "Compensación de desalineamientos",
-          "Flexibilidad de instalación",
-          "Transmisión suave de potencia",
-          "Fácil acceso para mantenimiento"
-        ]
-      };
-    } else {
-      return {
-        id: 4,
-        name: "Acoplamiento Industrial Estándar FA-STD",
-        image: "/Acoples render/4.png",
-        description: "Acoplamiento estándar para aplicaciones industriales generales con cargas moderadas.",
-        ventajas: [
-          "Versátil para múltiples aplicaciones",
-          "Instalación rápida y sencilla",
-          "Excelente relación calidad-precio",
-          "Mantenimiento estándar"
-        ]
-      };
-    }
-  } else {
-    return {
-      id: 3,
-      name: "Acoplamiento Básico FA-BASIC",
-      image: "/Acoples render/3.png",
-      description: "Acoplamiento básico para aplicaciones ligeras con cargas constantes y velocidades moderadas.",
-      ventajas: [
-        "Solución económica",
-        "Instalación simple",
-        "Mantenimiento mínimo",
-        "Ideal para cargas ligeras"
-      ]
-    };
-  }
+  return {
+    id: selectedCoupling ? parseInt(selectedCoupling.model.split(' ')[1]) || 1 : 1,
+    name: couplingName,
+    image: couplingImage,
+    description: couplingDescription,
+    ventajas: couplingAdvantages
+  };
 }
