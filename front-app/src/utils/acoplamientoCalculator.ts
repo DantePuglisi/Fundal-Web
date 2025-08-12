@@ -1,5 +1,6 @@
 import type { EspecificacionesForm, DistanciadorForm, ReductorForm } from '../interfaces/all_interfaces';
 import { selectCoupling, type CouplingModel } from '../couplingDatabase';
+import { getImagePath } from './imagePaths';
 
 export interface AcoplamientoResult {
   id: number;
@@ -216,7 +217,7 @@ function determineCouplingType(params: {
   const modelName = selectedCoupling ? ` - Modelo ${selectedCoupling.model}` : '';
   
   // Determine image based on coupling series and characteristics
-  let couplingImage = "/Acoples render/FA.png"; // Default FA series
+  let couplingImage = getImagePath("/Acoples render/FA.png"); // Default FA series
   let couplingName = "Acoplamiento FUNDAL FA";
   let couplingDescription = "Acoplamiento flexible estándar para transmisión de potencia industrial.";
   let couplingAdvantages = [
@@ -232,7 +233,7 @@ function determineCouplingType(params: {
     
     switch (series) {
       case 'FA':
-        couplingImage = "/Acoples render/FA.png";
+        couplingImage = getImagePath("/Acoples render/FA.png");
         couplingName = `Acoplamiento FUNDAL FA${modelName}`;
         couplingDescription = "Acoplamiento flexible estándar FUNDAL FA para transmisión confiable de potencia en aplicaciones industriales.";
         couplingAdvantages = [
@@ -244,7 +245,7 @@ function determineCouplingType(params: {
         break;
         
       case 'FA/D':
-        couplingImage = "/Acoples render/FA-D.png";
+        couplingImage = getImagePath("/Acoples render/FA-D.png");
         couplingName = `Acoplamiento con Distanciador FA/D${modelName}`;
         couplingDescription = "Acoplamiento FUNDAL FA/D con distanciador para aplicaciones que requieren separación entre ejes.";
         couplingAdvantages = [
@@ -256,7 +257,7 @@ function determineCouplingType(params: {
         break;
         
       case 'FA/C':
-        couplingImage = "/Acoples render/FA-C.png";
+        couplingImage = getImagePath("/Acoples render/FA-C.png");
         couplingName = `Acoplamiento Cardánico FA/C${modelName}`;
         couplingDescription = "Acoplamiento FUNDAL FA/C con cardán para aplicaciones con grandes desalineamientos angulares.";
         couplingAdvantages = [
@@ -268,7 +269,7 @@ function determineCouplingType(params: {
         break;
         
       case 'FA/FUS':
-        couplingImage = "/Acoples render/FA-FUS.png";
+        couplingImage = getImagePath("/Acoples render/FA-FUS.png");
         couplingName = `Acoplamiento Fusible FA/FUS${modelName}`;
         couplingDescription = "Acoplamiento FUNDAL FA/FUS con protección fusible para evitar daños por sobrecargas.";
         couplingAdvantages = [
@@ -281,11 +282,11 @@ function determineCouplingType(params: {
         
       case 'FAS NG':
         if (selectedCoupling.torqueNm > 50000) {
-          couplingImage = "/Acoples render/FAS-NG-H.png";
+          couplingImage = getImagePath("/Acoples render/FAS-NG-H.png");
           couplingName = `Acoplamiento FAS NG Heavy Duty${modelName}`;
           couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación para aplicaciones de alta potencia.";
         } else {
-          couplingImage = "/Acoples render/FAS-NG.png";
+          couplingImage = getImagePath("/Acoples render/FAS-NG.png");
           couplingName = `Acoplamiento FAS NG${modelName}`;
           couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación con tecnología avanzada.";
         }
@@ -299,11 +300,11 @@ function determineCouplingType(params: {
         
       case 'FAS NG-LP':
         if (hasFusible) {
-          couplingImage = "/Acoples render/FAS-NG-LP-FUS.png";
+          couplingImage = getImagePath("/Acoples render/FAS-NG-LP-FUS.png");
           couplingName = `Acoplamiento FAS NG-LP con Fusible${modelName}`;
           couplingDescription = "Acoplamiento FUNDAL FAS NG-LP de gran potencia con protección fusible integrada.";
         } else {
-          couplingImage = "/Acoples render/FAS-NG-LP.png";
+          couplingImage = getImagePath("/Acoples render/FAS-NG-LP.png");
           couplingName = `Acoplamiento FAS NG-LP${modelName}`;
           couplingDescription = "Acoplamiento FUNDAL FAS NG-LP para aplicaciones de gran potencia y torque elevado.";
         }
@@ -322,7 +323,7 @@ function determineCouplingType(params: {
   } else {
     // Fallback logic when no specific coupling is selected
     if (hasFusible) {
-      couplingImage = "/Acoples render/FA-FUS.png";
+      couplingImage = getImagePath("/Acoples render/FA-FUS.png");
       couplingName = "Acoplamiento Fusible FA-FUS";
       couplingDescription = "Acoplamiento fusible recomendado para protección contra sobrecargas.";
       couplingAdvantages = [
@@ -332,7 +333,7 @@ function determineCouplingType(params: {
         "Mantenimiento mínimo"
       ];
     } else if (hasDistanciador) {
-      couplingImage = "/Acoples render/FA-D.png";
+      couplingImage = getImagePath("/Acoples render/FA-D.png");
       couplingName = "Acoplamiento con Distanciador FA-D";
       couplingDescription = "Acoplamiento con distanciador para separación entre ejes.";
       couplingAdvantages = [
@@ -342,7 +343,7 @@ function determineCouplingType(params: {
         "Transmisión suave de potencia"
       ];
     } else if (powerHP > 500 || serviceFactor > 2.5) {
-      couplingImage = "/Acoples render/FAS-NG.png";
+      couplingImage = getImagePath("/Acoples render/FAS-NG.png");
       couplingName = "Acoplamiento FAS NG";
       couplingDescription = "Acoplamiento de nueva generación para altas potencias y factores de servicio elevados.";
       couplingAdvantages = [

@@ -1,14 +1,15 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { calculateAcoplamiento, type AcoplamientoResult, type FormData } from '../../utils/acoplamientoCalculator';
+import { getImagePath } from '../../utils/imagePaths';
 import html2canvas from 'html2canvas';
 const icons = [
-  { icon: "/icons/Alta performance.png", label: "Alta performance" },
-  { icon: "/icons/Vida util prolongada.png", label: "Vida útil prolongada" },
-  { icon: "/icons/Estabilidas dinamica.png", label: "Estabilidad dinámica" },
-  { icon: "/icons/Eficiencia.png", label: "Eficiencia" },
-  { icon: "/icons/Respuesta elastica.png", label: "Excelente respuesta elástica" },
-  { icon: "/icons/Mantenimiento.png", label: "Mantenimiento fácil y rápido" },
+  { icon: getImagePath("/icons/Alta performance.png"), label: "Alta performance" },
+  { icon: getImagePath("/icons/Vida util prolongada.png"), label: "Vida útil prolongada" },
+  { icon: getImagePath("/icons/Estabilidas dinamica.png"), label: "Estabilidad dinámica" },
+  { icon: getImagePath("/icons/Eficiencia.png"), label: "Eficiencia" },
+  { icon: getImagePath("/icons/Respuesta elastica.png"), label: "Excelente respuesta elástica" },
+  { icon: getImagePath("/icons/Mantenimiento.png"), label: "Mantenimiento fácil y rápido" },
 ];
 
 function AcoplamientoApp() {
@@ -210,7 +211,7 @@ function AcoplamientoApp() {
                 <div className="flex-shrink-0">
                   <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-2.5 shadow-sm">
                     <img 
-                      src={icons[i % icons.length]?.icon || "/icons/Alta performance.png"} 
+                      src={icons[i % icons.length]?.icon || getImagePath("/icons/Alta performance.png")} 
                       alt="advantage" 
                       className="w-full h-full object-contain filter brightness-0 invert" 
                     />
@@ -279,7 +280,7 @@ function AcoplamientoApp() {
               className="bg-teal-700 hover:bg-teal-800 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2" 
               style={{ fontFamily: 'Poppins' }}
             >
-              <img src="/icons/descargar.png" alt="Descargar" className="w-5 h-5" />
+              <img src={getImagePath("/icons/descargar.png")} alt="Descargar" className="w-5 h-5" />
               Descargar Informe
             </button>
             
@@ -311,7 +312,7 @@ function AcoplamientoApp() {
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2" 
               style={{ fontFamily: 'Poppins' }}
             >
-              <img src="/icons/cotizar.png" alt="Cotizar" className="w-5 h-5" />
+              <img src={getImagePath("/icons/cotizar.png")} alt="Cotizar" className="w-5 h-5" />
               Solicitar Cotización
             </button>
             
@@ -345,7 +346,7 @@ function AcoplamientoApp() {
               className="bg-gray-600 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2" 
               style={{ fontFamily: 'Poppins' }}
             >
-              <img src="/icons/compartir.png" alt="Compartir" className="w-5 h-5" />
+              <img src={getImagePath("/icons/compartir.png")} alt="Compartir" className="w-5 h-5" />
               Compartir
             </button>
           </div>

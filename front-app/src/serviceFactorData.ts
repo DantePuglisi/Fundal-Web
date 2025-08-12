@@ -1,4 +1,5 @@
 // Service Factor data extracted from the CSV file
+import { getImagePath } from './utils/imagePaths';
 export interface SubApplication {
   name: string;
   serviceFactor: number;
@@ -16,7 +17,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 1,
     name: "Bombas",
-    icon: "/bomba.png",
+    icon: getImagePath("/bomba.png"),
     subApplications: [
       { name: "Centrífugas normales", serviceFactor: 1.00 },
       { name: "Alta densidad y sobrecarga", serviceFactor: 1.25 },
@@ -29,7 +30,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 2,
     name: "Sopladores y Ventiladores",
-    icon: "/sopladores y ventiladores.png",
+    icon: getImagePath("/sopladores y ventiladores.png"),
     subApplications: [
       { name: "Centrífugos", serviceFactor: 1.00 },
       { name: "Metálicos", serviceFactor: 1.25 },
@@ -43,7 +44,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 3,
     name: "Compresores",
-    icon: "/compresores.png",
+    icon: getImagePath("/compresores.png"),
     subApplications: [
       { name: "Centrífugos", serviceFactor: 1.25 },
       { name: "Rotativos", serviceFactor: 1.50 },
@@ -54,7 +55,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 4,
     name: "Cintas transportadoras, elevadores",
-    icon: "/cintas transportadoras.png",
+    icon: getImagePath("/cintas transportadoras.png"),
     subApplications: [
       { name: "Montacarga", serviceFactor: 1.75 },
       { name: "Cintas transportadoras carga uniforme", serviceFactor: 1.70 },
@@ -67,7 +68,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 5,
     name: "Trituradores",
-    icon: "/trituradores.png",
+    icon: getImagePath("/trituradores.png"),
     subApplications: [
       { name: "De piedra", serviceFactor: 2.75 },
       { name: "De caña", serviceFactor: 2.50 },
@@ -79,7 +80,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 6,
     name: "Trenes de laminación",
-    icon: "/trenes de laminacion.png",
+    icon: getImagePath("/trenes de laminacion.png"),
     subApplications: [
       { name: "Cizallas de corte", serviceFactor: 2.50 },
       { name: "Trenes de laminación en frío", serviceFactor: 2.00 },
@@ -102,7 +103,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 7,
     name: "Generadores",
-    icon: "/generadores.png",
+    icon: getImagePath("/generadores.png"),
     subApplications: [
       { name: "Carga uniforme", serviceFactor: 1.00 },
       { name: "Motosoldadores", serviceFactor: 2.00 }
@@ -111,7 +112,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 8,
     name: "Guinches y Puentes Grúa",
-    icon: "/guinches y puentes grua.png",
+    icon: getImagePath("/guinches y puentes grua.png"),
     subApplications: [
       { name: "Traslación", serviceFactor: 1.75 },
       { name: "Malacate principal", serviceFactor: 2.00 }
@@ -120,7 +121,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 9,
     name: "Extrusoras",
-    icon: "/extrusoras.png",
+    icon: getImagePath("/extrusoras.png"),
     subApplications: [
       { name: "Densidad constante", serviceFactor: 1.50 },
       { name: "Densidad variable", serviceFactor: 2.50 }
@@ -129,7 +130,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 10,
     name: "Máquina motriz",
-    icon: "/maquina motriz.png",
+    icon: getImagePath("/maquina motriz.png"),
     subApplications: [
       { name: "Motor eléctrico y turbinas", serviceFactor: 0.00 },
       { name: "Motores de velocidad variable", serviceFactor: 0.80 },
@@ -146,7 +147,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 10,
     name: "Agitadores",
-    icon: "/icons/Alta performance.png", // No specific icon available
+    icon: getImagePath("/icons/Alta performance.png"), // No specific icon available
     subApplications: [
       { name: "Líquidos", serviceFactor: 1.00 },
       { name: "Líquidos c/sólidos en suspensión", serviceFactor: 1.25 },
@@ -157,7 +158,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 11,
     name: "Industria del caucho",
-    icon: "/icons/Estabilidas dinamica.png", // No specific icon available
+    icon: getImagePath("/icons/Estabilidas dinamica.png"), // No specific icon available
     subApplications: [
       { name: "Calandras", serviceFactor: 2.00 },
       { name: "Molinos", serviceFactor: 2.50 },
@@ -168,7 +169,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 12,
     name: "Acería",
-    icon: "/icons/Vida util prolongada.png", // No specific icon available
+    icon: getImagePath("/icons/Vida util prolongada.png"), // No specific icon available
     subApplications: [
       { name: "Soplantes de alto horno", serviceFactor: 1.75 },
       { name: "Convertidores", serviceFactor: 2.50 },
@@ -179,7 +180,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 13,
     name: "Aserraderos",
-    icon: "/icons/Mantenimiento.png", // No specific icon available
+    icon: getImagePath("/icons/Mantenimiento.png"), // No specific icon available
     subApplications: [
       { name: "Transportadores", serviceFactor: 1.70 },
       { name: "Sierras", serviceFactor: 1.75 },
@@ -191,7 +192,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 14,
     name: "Celulosa y papel",
-    icon: "/icons/Alta performance.png", // No specific icon available
+    icon: getImagePath("/icons/Alta performance.png"), // No specific icon available
     subApplications: [
       { name: "Bombas de servicio", serviceFactor: 1.00 },
       { name: "Bobinadoras", serviceFactor: 1.50 },
@@ -208,7 +209,7 @@ export const serviceFactorData: Application[] = [
   {
     id: 15,
     name: "Aplicaciones marinas",
-    icon: "/icons/Respuesta elastica.png", // No specific icon available
+    icon: getImagePath("/icons/Respuesta elastica.png"), // No specific icon available
     subApplications: [
       { name: "Dragas", serviceFactor: 2.50 }
     ]
