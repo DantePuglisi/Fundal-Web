@@ -16,18 +16,19 @@ const Toggle: React.FC<ToggleProps> = ({ checked, onChange, label, id }) => (
       onChange={() => onChange(!checked)}
       className="sr-only"
     />
-    <div
-      className={`w-10 h-5 flex items-center rounded-full p-1 duration-300 ease-in-out ${
-        checked ? "bg-white" : "bg-white"
-      }`}
-    >
+    <div className="relative">
       <div
-        className={`bg-green-500 w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${
-          checked ? "translate-x-5" : ""
+        className={`w-14 h-7 rounded-full transition-colors duration-200 ease-in-out ${
+          checked ? "bg-teal-600" : "bg-gray-300"
         }`}
-      ></div>
+      />
+      <div
+        className={`absolute top-0.5 left-0.5 bg-white w-6 h-6 rounded-full shadow transition-transform duration-200 ease-in-out ${
+          checked ? "translate-x-7" : "translate-x-0"
+        }`}
+      />
     </div>
-    {label && <span className="ml-2">{label}</span>}
+    {label && <span className="ml-2 text-gray-700">{label}</span>}
   </label>
 );
 

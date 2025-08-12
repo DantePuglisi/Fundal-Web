@@ -8,15 +8,17 @@ function App() {
 
   return (
       <ErrorBoundary>
-        <div className='flex flex-col items-center justify-center mt-3'>
-          <div className='text-center mt-[55px] mb-[50px]'>
-            <img src={logo} alt="fundal-logo" className="w-xs" />
+        <div className='min-h-screen bg-gray-50'>
+          <div className='flex flex-col items-center pt-8'>
+            <div className='text-center mb-12'>
+              <img src={logo} alt="fundal-logo" className="w-xs mx-auto" />
+            </div>
+            <Routes>
+              <Route path="/" element={<Cards />} />
+              <Route path="/app/:id" element={<Form />} />
+              <Route path="/acoplamiento" element={<AcoplamientoApp />} />
+            </Routes>
           </div>
-          <Routes>
-            <Route path="/" element={<Cards />} />
-            <Route path="/app/:id" element={<Form />} />
-            <Route path="/acoplamiento" element={<AcoplamientoApp />} />
-          </Routes>
         </div>
       </ErrorBoundary>
   )

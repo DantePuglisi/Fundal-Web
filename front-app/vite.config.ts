@@ -8,6 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/Fundal-Web/',
   build: {
     rollupOptions: {
       output: {

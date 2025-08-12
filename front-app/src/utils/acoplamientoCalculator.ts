@@ -1,4 +1,5 @@
 import type { EspecificacionesForm, DistanciadorForm, ReductorForm } from '../interfaces/all_interfaces';
+import { selectCoupling, type CouplingModel } from '../couplingDatabase';
 
 export interface AcoplamientoResult {
   id: number;
@@ -7,6 +8,8 @@ export interface AcoplamientoResult {
   factorServicio: number;
   description: string;
   ventajas: string[];
+  couplingModel?: CouplingModel;
+  calculatedTorqueNm?: number;
 }
 
 export interface FormData {
@@ -14,6 +17,8 @@ export interface FormData {
   distanciador?: DistanciadorForm;
   reductor?: ReductorForm;
   applicationId?: number;
+  subApplication?: string;
+  serviceFactor?: number;
 }
 
 /**
@@ -26,7 +31,7 @@ export interface FormData {
  * @returns AcoplamientoResult - The recommended coupling with calculated service factor
  */
 export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
-  const { especificaciones, distanciador, applicationId } = data;
+  const { especificaciones, distanciador, applicationId, subApplication, serviceFactor } = data;
   
   // Convert power to HP for standardized calculations
   const powerHP = especificaciones.hp_or_kw 
@@ -37,35 +42,58 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   const conductorDiameter = parseFloat(especificaciones.eje_conductor) || 0;
   const conducidoDiameter = parseFloat(especificaciones.eje_conducido) || 0;
   
-  // Calculate base service factor
-  let serviceFactor = calculateBaseServiceFactor(powerHP, rpm, applicationId);
+  // Use service factor from CSV if available, otherwise calculate
+  let finalServiceFactor = serviceFactor || calculateBaseServiceFactor(powerHP, rpm, applicationId);
   
-  // Apply modifiers based on equipment characteristics
-  serviceFactor = applyEquipmentModifiers(serviceFactor, {
-    hasDistanciador: especificaciones.distanciador,
-    hasReductor: especificaciones.reductor,
-    hasFusible: especificaciones.acople,
-    dbse: distanciador?.dbse,
-    shaftDifference: Math.abs(conductorDiameter - conducidoDiameter)
-  });
+  // Apply modifiers based on equipment characteristics only if no CSV service factor provided
+  if (!serviceFactor) {
+    finalServiceFactor = applyEquipmentModifiers(finalServiceFactor, {
+      hasDistanciador: especificaciones.distanciador,
+      hasReductor: especificaciones.reductor,
+      hasFusible: especificaciones.acople,
+      dbse: distanciador?.dbse,
+      shaftDifference: Math.abs(conductorDiameter - conducidoDiameter)
+    });
+  }
+  
+  // Calculate required torque using FUNDAL formula: Torque (Nm) = (7026 × HP) / RPM × FS
+  const calculatedTorqueNm = (7026 * powerHP * finalServiceFactor) / rpm;
+  
+  // Select the appropriate coupling from database
+  const maxShaftDiameter = Math.max(conductorDiameter, conducidoDiameter);
+  const selectedCoupling = selectCoupling(
+    calculatedTorqueNm,
+    maxShaftDiameter,
+    especificaciones.distanciador,
+    especificaciones.acople,
+    rpm
+  );
   
   // Determine coupling type based on specifications
   const couplingType = determineCouplingType({
-    serviceFactor,
+    serviceFactor: finalServiceFactor,
     powerHP,
     rpm,
     hasFusible: especificaciones.acople,
     hasDistanciador: especificaciones.distanciador,
-    maxShaftDiameter: Math.max(conductorDiameter, conducidoDiameter)
+    maxShaftDiameter,
+    selectedCoupling
   });
+  
+  // Create enhanced description if we have sub-application info
+  const enhancedDescription = subApplication 
+    ? `${couplingType.description} Optimizado para aplicaciones de ${subApplication.toLowerCase()}.`
+    : couplingType.description;
   
   return {
     id: couplingType.id,
     name: couplingType.name,
     image: couplingType.image,
-    factorServicio: Math.round(serviceFactor * 100) / 100, // Round to 2 decimal places
-    description: couplingType.description,
-    ventajas: couplingType.ventajas
+    factorServicio: Math.round(finalServiceFactor * 100) / 100, // Round to 2 decimal places
+    description: enhancedDescription,
+    ventajas: couplingType.ventajas,
+    couplingModel: selectedCoupling || undefined,
+    calculatedTorqueNm: Math.round(calculatedTorqueNm * 10) / 10 // Round to 1 decimal place
   };
 }
 
@@ -174,6 +202,7 @@ function determineCouplingType(params: {
   hasFusible: boolean;
   hasDistanciador: boolean;
   maxShaftDiameter: number;
+  selectedCoupling: CouplingModel | null;
 }): {
   id: number;
   name: string;
@@ -181,14 +210,17 @@ function determineCouplingType(params: {
   description: string;
   ventajas: string[];
 } {
-  const { serviceFactor, powerHP, hasFusible, hasDistanciador } = params;
+  const { serviceFactor, powerHP, hasFusible, hasDistanciador, selectedCoupling } = params;
+  
+  // Include coupling model information if available
+  const modelName = selectedCoupling ? ` - Modelo ${selectedCoupling.model}` : '';
   
   // Fusible coupling types
   if (hasFusible) {
     if (serviceFactor > 2.5 || powerHP > 200) {
       return {
         id: 8,
-        name: "Acoplamiento Fusible de Alta Potencia FA-FUS",
+        name: `Acoplamiento Fusible de Alta Potencia FA-FUS${modelName}`,
         image: "/Acoples render/8.png",
         description: "Acoplamiento fusible diseñado para aplicaciones de alta potencia con protección contra sobrecargas extremas.",
         ventajas: [

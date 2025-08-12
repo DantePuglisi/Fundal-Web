@@ -1,26 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { FactorService } from '../interfaces/all_interfaces';
-import app_data from "../data";
+import { serviceFactorData } from "../serviceFactorData";
 import Card from "./card";
-import SopladoresVentiladores from "./appsComponents/SopladoresVentiladores";
+import SubApplicationModal from "./SubApplicationModal";
 
 function Cards() {
     const [showModal, setShowModal] = useState(false);
-    const [factorService, setFactorService] = useState<FactorService | '-'>('-');
+    const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
     const navigate = useNavigate();
 
     const handleCardClick = (id: number) => {
-        if (id === 5) setShowModal(true);
-        else navigate(`/app/${id}`);
+        setSelectedApplication(id);
+        setShowModal(true);
+    };
+
+    const handleSubApplicationSelect = (applicationId: number, subApplicationName: string, serviceFactor: number) => {
+        setShowModal(false);
+        // Navigate to form with the selected application and service factor
+        navigate(`/app/${applicationId}`, { 
+            state: { 
+                subApplication: subApplicationName, 
+                serviceFactor: serviceFactor 
+            } 
+        });
     };
     return (
         <div>
             <p className='text-gray-600 font-poppins font-bold text-2xl text-center mb-6 mt-[-45px]' style={{ fontFamily: 'Poppins' }}>Seleccione la aplicación</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
-                {app_data.map((item, index) => (
-                    <div key={index} onClick={() => handleCardClick(item.id)}>
-                        <Card title={item.title} icon={item.icon} />
+                {serviceFactorData.map((application) => (
+                    <div key={application.id} onClick={() => handleCardClick(application.id)}>
+                        <Card title={application.name} icon={application.icon} />
                     </div>
                 ))}
             </div>
@@ -29,18 +39,21 @@ function Cards() {
                 <p className='text-gray-600 font-poppins font-bold text-2xl text-center mb-2' style={{ fontFamily: 'Poppins' }}>
                     Factor de servicio
                 </p>
+                <p className='text-gray-600 text-center text-sm mb-4' style={{ fontFamily: 'Poppins' }}>
+                    Se aplicará automáticamente según la aplicación seleccionada
+                </p>
                 <div className="flex justify-center">
-                    <input
-                        type="number"
-                        className="bg-[#E9EFEF] rounded-md w-32 h-10 flex items-center justify-center mx-auto text-center text-xl text-gray-700 font-bold outline-none"
-                        value={factorService !== '-' ? factorService.value : ''}
-                        onChange={e => setFactorService(factorService !== '-' ? { ...factorService, value: parseFloat(e.target.value) } : { id: 1, name: 'manual', value: parseFloat(e.target.value) })}
-                        placeholder="-"
-                    />
+                    <div className="bg-[#E9EFEF] rounded-md w-32 h-10 flex items-center justify-center text-xl text-gray-700 font-bold">
+                        Auto
+                    </div>
                 </div>
             </div>
-            {showModal && (
-                <SopladoresVentiladores icon={app_data.find(item => item.id === 5)?.icon || ''} onClose={() => setShowModal(false)} />
+            {showModal && selectedApplication && (
+                <SubApplicationModal 
+                    application={serviceFactorData.find(app => app.id === selectedApplication)!}
+                    onClose={() => setShowModal(false)}
+                    onSelect={handleSubApplicationSelect}
+                />
             )}
         </div>
          
