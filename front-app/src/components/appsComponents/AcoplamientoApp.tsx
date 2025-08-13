@@ -184,6 +184,14 @@ function AcoplamientoApp() {
                   { label: "Ø Conductor", value: `${formData?.especificaciones.eje_conductor || 'N/A'} mm` },
                   { label: "Ø Conducido", value: `${formData?.especificaciones.eje_conducido || 'N/A'} mm` },
                   { label: "Distanciador", value: formData?.especificaciones.distanciador ? (formData?.distanciador?.dbse ? `${formData.distanciador.dbse} mm` : 'SÍ') : 'NO' },
+                  ...(formData?.especificaciones.reductor ? [
+                    { label: "Reductor", value: 'SÍ' },
+                    ...(formData?.reductor?.relacion_npm ? [{ label: "Relación", value: formData.reductor.relacion_npm }] : []),
+                    ...(formData?.reductor?.eje_salida ? [{ label: "Ø Eje Salida", value: `${formData.reductor.eje_salida} mm` }] : []),
+                    ...(formData?.reductor?.eje_conducido ? [{ label: "Ø Eje Conducido", value: `${formData.reductor.eje_conducido} mm` }] : []),
+                  ] : [
+                    { label: "Reductor", value: 'NO' }
+                  ]),
                   { label: "Sistema Fusible", value: formData?.especificaciones.acople ? 'SÍ' : 'NO' },
                 ].map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

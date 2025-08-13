@@ -176,10 +176,10 @@ function generateCouplingCode(coupling: CouplingModel, data: FormData): string {
   const masaCode = (coupling as any).recommendedMasaCode || '';
   const hasFuse = especificaciones.acople;
   
-  // For FA series with fuse, format is "FA X / FUS / 1*"
+  // For FA series with fuse, format is "FA X / FUS / 1"
   if (coupling.series === 'FA/FUS') {
     const modelNumber = baseModel.match(/\d+/)?.[0];
-    return `FA ${modelNumber} / FUS${masaCode}`;
+    return `FA ${modelNumber} / FUS ${masaCode}`;
   }
   
   // For FA series with spacer, use user's DBSE value
@@ -187,19 +187,19 @@ function generateCouplingCode(coupling: CouplingModel, data: FormData): string {
     const modelNumber = baseModel.match(/\d+/)?.[0];
     const userDBSE = distanciador?.dbse;
     const dbseValue = userDBSE || 130; // Use user's DBSE or default to 130
-    return `FA ${modelNumber} / D ${dbseValue}${masaCode}`;
+    return `FA ${modelNumber} / D ${dbseValue} ${masaCode}`;
   }
   
-  // For FA series with cardan, format is "FA X / C 11 ½*"
+  // For FA series with cardan, format is "FA X / C 11 ½"
   if (coupling.series === 'FA/C') {
     const modelNumber = baseModel.match(/\d+/)?.[0];
     return `FA ${modelNumber} / C 11 ½`;
   }
   
-  // For standard FA series, format is "FA X / 1*" with masa code
+  // For standard FA series, format is "FA X / 1" with masa code
   if (coupling.series === 'FA') {
     const modelNumber = baseModel.match(/\d+/)?.[0];
-    return `FA ${modelNumber}${masaCode}`;
+    return `FA ${modelNumber} ${masaCode}`;
   }
   
   // For FAS NG series

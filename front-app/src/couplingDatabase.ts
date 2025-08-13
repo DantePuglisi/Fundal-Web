@@ -294,7 +294,7 @@ function checkMasaCompatibility(
     return { 
       isCompatible: true, 
       masaType: "Dos masas convencionales",
-      masaCode: "/1" 
+      masaCode: "/ 1" 
     };
   }
   
@@ -303,7 +303,7 @@ function checkMasaCompatibility(
     return { 
       isCompatible: true, 
       masaType: "Una masa convencional y una masa llena",
-      masaCode: "/3" 
+      masaCode: "/ 3" 
     };
   }
   
@@ -312,7 +312,7 @@ function checkMasaCompatibility(
     return { 
       isCompatible: true, 
       masaType: "Dos masas llenas",
-      masaCode: "/2" 
+      masaCode: "/ 2" 
     };
   }
   
