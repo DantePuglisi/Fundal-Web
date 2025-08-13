@@ -79,7 +79,7 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   }
   
   // Step 3: Generate coupling code based on catalog format
-  const couplingCode = generateCouplingCode(selectedCoupling, especificaciones.acople, especificaciones.distanciador);
+  const couplingCode = generateCouplingCode(selectedCoupling, data);
   
   // Determine coupling type and characteristics
   const couplingDetails = getCouplingDetails(selectedCoupling, especificaciones.acople, especificaciones.distanciador);
@@ -170,9 +170,11 @@ function calculateResultantServiceFactor(data: FormData): number {
 /**
  * Generates the coupling code based on catalog format
  */
-function generateCouplingCode(coupling: CouplingModel, hasFuse: boolean, _hasSpacerr: boolean): string {
+function generateCouplingCode(coupling: CouplingModel, data: FormData): string {
+  const { especificaciones, distanciador } = data;
   const baseModel = coupling.model.replace(/\s+/g, ' ');
   const masaCode = (coupling as any).recommendedMasaCode || '';
+  const hasFuse = especificaciones.acople;
   
   // For FA series with fuse, format is "FA X / FUS / 1*"
   if (coupling.series === 'FA/FUS') {
@@ -180,10 +182,12 @@ function generateCouplingCode(coupling: CouplingModel, hasFuse: boolean, _hasSpa
     return `FA ${modelNumber} / FUS${masaCode}`;
   }
   
-  // For FA series with spacer, format is "FA X / D 130 / 1*"
+  // For FA series with spacer, use user's DBSE value
   if (coupling.series === 'FA/D') {
     const modelNumber = baseModel.match(/\d+/)?.[0];
-    return `FA ${modelNumber} / D 130${masaCode}`;
+    const userDBSE = distanciador?.dbse;
+    const dbseValue = userDBSE || 130; // Use user's DBSE or default to 130
+    return `FA ${modelNumber} / D ${dbseValue}${masaCode}`;
   }
   
   // For FA series with cardan, format is "FA X / C 11 ½*"

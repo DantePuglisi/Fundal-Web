@@ -9,6 +9,10 @@ export interface CouplingModel {
   masaConvencionalMax?: number;
   masaLlenaMin?: number;
   masaLlenaMax?: number;
+  // For FA/D models - available DBSE values
+  availableDBSE?: number[];
+  // Selected DBSE value for this specific coupling instance
+  selectedDBSE?: number;
   // Legacy fields for non-FA series compatibility
   boreDiameterMin?: number;
   boreDiameterMax?: number;
@@ -75,62 +79,73 @@ export const FA_SERIES: CouplingModel[] = [
   }
 ];
 
-// FA/D Series - With Spacer (same masa ranges as FA)
+// FA/D Series - With Spacer (same masa ranges as FA) + available DBSE values
 export const FAD_SERIES: CouplingModel[] = [
   { 
     model: "FA 1 D", series: "FA/D", torqueNm: 29, maxRPM: 3750,
     masaConvencionalMin: 0, masaConvencionalMax: 15,
-    masaLlenaMin: 0, masaLlenaMax: 28
+    masaLlenaMin: 0, masaLlenaMax: 28,
+    availableDBSE: [70, 90, 100, 130, 150]
   },
   { 
     model: "FA 2 D", series: "FA/D", torqueNm: 44, maxRPM: 3750,
     masaConvencionalMin: 0, masaConvencionalMax: 24,
-    masaLlenaMin: 0, masaLlenaMax: 36
+    masaLlenaMin: 0, masaLlenaMax: 36,
+    availableDBSE: [70, 90, 100, 130, 140, 150]
   },
   { 
     model: "FA 3 D", series: "FA/D", torqueNm: 89, maxRPM: 3750,
     masaConvencionalMin: 0, masaConvencionalMax: 32,
-    masaLlenaMin: 0, masaLlenaMax: 48
+    masaLlenaMin: 0, masaLlenaMax: 48,
+    availableDBSE: [90, 100, 130, 140, 150]
   },
   { 
     model: "FA 4 D", series: "FA/D", torqueNm: 373, maxRPM: 3750,
     masaConvencionalMin: 0, masaConvencionalMax: 45,
-    masaLlenaMin: 0, masaLlenaMax: 68
+    masaLlenaMin: 0, masaLlenaMax: 68,
+    availableDBSE: [100, 130, 140, 150, 180, 220]
   },
   { 
     model: "FA 5 D", series: "FA/D", torqueNm: 755, maxRPM: 3000,
     masaConvencionalMin: 0, masaConvencionalMax: 55,
-    masaLlenaMin: 0, masaLlenaMax: 87
+    masaLlenaMin: 0, masaLlenaMax: 87,
+    availableDBSE: [100, 130, 140, 150, 180, 200, 220]
   },
   { 
     model: "FA 6 D", series: "FA/D", torqueNm: 1059, maxRPM: 3000,
     masaConvencionalMin: 0, masaConvencionalMax: 70,
-    masaLlenaMin: 0, masaLlenaMax: 90
+    masaLlenaMin: 0, masaLlenaMax: 90,
+    availableDBSE: [130, 140, 180, 200, 220, 250]
   },
   { 
     model: "FA 7 D", series: "FA/D", torqueNm: 2030, maxRPM: 2500,
     masaConvencionalMin: 30, masaConvencionalMax: 75,
-    masaLlenaMin: 40, masaLlenaMax: 112
+    masaLlenaMin: 40, masaLlenaMax: 112,
+    availableDBSE: [130, 140, 180, 200, 250]
   },
   { 
     model: "FA 8 D", series: "FA/D", torqueNm: 2599, maxRPM: 2300,
     masaConvencionalMin: 35, masaConvencionalMax: 87,
-    masaLlenaMin: 80, masaLlenaMax: 125
+    masaLlenaMin: 80, masaLlenaMax: 125,
+    availableDBSE: [140, 200, 250]
   },
   { 
     model: "FA 9 D", series: "FA/D", torqueNm: 7063, maxRPM: 1800,
     masaConvencionalMin: 40, masaConvencionalMax: 118,
-    masaLlenaMin: 100, masaLlenaMax: 160
+    masaLlenaMin: 100, masaLlenaMax: 160,
+    availableDBSE: [250]
   },
   { 
     model: "FA 10 D", series: "FA/D", torqueNm: 11821, maxRPM: 1500,
     masaConvencionalMin: 60, masaConvencionalMax: 143,
-    masaLlenaMin: 110, masaLlenaMax: 180
+    masaLlenaMin: 110, masaLlenaMax: 180,
+    availableDBSE: [] // No values shown in table
   },
   { 
     model: "FA 11 D", series: "FA/D", torqueNm: 21915, maxRPM: 1200,
     masaConvencionalMin: 80, masaConvencionalMax: 175,
-    masaLlenaMin: 150, masaLlenaMax: 220
+    masaLlenaMin: 150, masaLlenaMax: 220,
+    availableDBSE: [] // No values shown in table
   }
 ];
 
@@ -268,9 +283,14 @@ function checkMasaCompatibility(
   const llenaMin = coupling.masaLlenaMin || 0;
   const llenaMax = coupling.masaLlenaMax || 0;
   
-  // Check if both shafts fit in masa convencional range
-  if (conductorDiameter >= convMin && conductorDiameter <= convMax &&
-      conducidoDiameter >= convMin && conducidoDiameter <= convMax) {
+  // Check what fits where
+  const conductorFitsConv = conductorDiameter >= convMin && conductorDiameter <= convMax;
+  const conducidoFitsConv = conducidoDiameter >= convMin && conducidoDiameter <= convMax;
+  const conductorFitsLlena = conductorDiameter >= llenaMin && conductorDiameter <= llenaMax;
+  const conducidoFitsLlena = conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax;
+  
+  // Priority 1: Both shafts fit in masa convencional (most economical)
+  if (conductorFitsConv && conducidoFitsConv) {
     return { 
       isCompatible: true, 
       masaType: "Dos masas convencionales",
@@ -278,31 +298,21 @@ function checkMasaCompatibility(
     };
   }
   
-  // Check if both shafts fit in masa llena range
-  if (conductorDiameter >= llenaMin && conductorDiameter <= llenaMax &&
-      conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax) {
-    return { 
-      isCompatible: true, 
-      masaType: "Dos masas llenas",
-      masaCode: "/2" 
-    };
-  }
-  
-  // Check if one shaft fits in convencional and the other in llena
-  const oneFitsConv = (conductorDiameter >= convMin && conductorDiameter <= convMax) ||
-                      (conducidoDiameter >= convMin && conducidoDiameter <= convMax);
-  const oneFitsLlena = (conductorDiameter >= llenaMin && conductorDiameter <= llenaMax) ||
-                       (conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax);
-  
-  if (oneFitsConv && oneFitsLlena && 
-      ((conductorDiameter >= convMin && conductorDiameter <= convMax && 
-        conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax) ||
-       (conducidoDiameter >= convMin && conducidoDiameter <= convMax && 
-        conductorDiameter >= llenaMin && conductorDiameter <= llenaMax))) {
+  // Priority 2: Use mix of convencional and llena when possible (more economical than 2 llenas)
+  if ((conductorFitsConv && conducidoFitsLlena) || (conducidoFitsConv && conductorFitsLlena)) {
     return { 
       isCompatible: true, 
       masaType: "Una masa convencional y una masa llena",
       masaCode: "/3" 
+    };
+  }
+  
+  // Priority 3: Both shafts fit in masa llena (least economical but sometimes necessary)
+  if (conductorFitsLlena && conducidoFitsLlena) {
+    return { 
+      isCompatible: true, 
+      masaType: "Dos masas llenas",
+      masaCode: "/2" 
     };
   }
   

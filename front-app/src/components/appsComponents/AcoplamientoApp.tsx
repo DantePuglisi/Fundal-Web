@@ -183,6 +183,7 @@ function AcoplamientoApp() {
                   { label: "Velocidad", value: `${formData?.especificaciones.velocidad_rpm || 'N/A'} RPM` },
                   { label: "Ø Conductor", value: `${formData?.especificaciones.eje_conductor || 'N/A'} mm` },
                   { label: "Ø Conducido", value: `${formData?.especificaciones.eje_conducido || 'N/A'} mm` },
+                  { label: "Distanciador", value: formData?.especificaciones.distanciador ? (formData?.distanciador?.dbse ? `${formData.distanciador.dbse} mm` : 'SÍ') : 'NO' },
                   { label: "Sistema Fusible", value: formData?.especificaciones.acople ? 'SÍ' : 'NO' },
                 ].map((item, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
