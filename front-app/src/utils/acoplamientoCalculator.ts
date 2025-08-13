@@ -51,9 +51,13 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   const calculatedServiceFactor = calculateResultantServiceFactor(data);
   const finalServiceFactor = serviceFactor || calculatedServiceFactor;
   
-  // Step 1: Calculate required torque using FUNDAL formula
-  // Torque (Nm) = (7026 × HP × FS) / RPM
-  const requiredTorqueNm = (7026 * powerHP * finalServiceFactor) / rpm;
+  // Step 1: Calculate nominal torque (equipment torque without service factor)
+  // Torque Nominal (Nm) = (7026 × HP) / RPM
+  const nominalTorqueNm = (7026 * powerHP) / rpm;
+  
+  // Step 2: Calculate required torque for coupling selection (with service factor)
+  // Required Torque (Nm) = Nominal Torque × FS
+  const requiredTorqueNm = nominalTorqueNm * finalServiceFactor;
   
   // Step 2: Find appropriate coupling
   const selectedCoupling = selectCoupling(
@@ -78,7 +82,11 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
     };
   }
   
-  // Step 3: Generate coupling code based on catalog format
+  // Step 3: Calculate resultant service factor based on selected coupling
+  // FS Resultante = Torque Max Acoplamiento / Torque Nominal Equipo
+  const resultantServiceFactor = selectedCoupling.torqueNm / nominalTorqueNm;
+  
+  // Step 4: Generate coupling code based on catalog format
   const couplingCode = generateCouplingCode(selectedCoupling, data);
   
   // Determine coupling type and characteristics
@@ -88,11 +96,11 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
     id: parseInt(selectedCoupling.model.match(/\d+/)?.[0] || '1'),
     name: `${couplingDetails.name} - ${selectedCoupling.model}`,
     image: couplingDetails.image,
-    factorServicio: Math.round(calculatedServiceFactor * 100) / 100, // Show resultant, not final
+    factorServicio: Math.round(resultantServiceFactor * 100) / 100, // Resultant service factor based on selected coupling
     description: couplingDetails.description,
     ventajas: couplingDetails.ventajas,
     couplingModel: selectedCoupling,
-    calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+    calculatedTorqueNm: Math.round(nominalTorqueNm * 10) / 10, // Show nominal torque (equipment torque)
     couplingCode: couplingCode,
     masaType: (selectedCoupling as any).recommendedMasaType
   };

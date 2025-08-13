@@ -154,10 +154,10 @@ function AcoplamientoApp() {
                         )}
                         <div className="mt-3 space-y-1 text-sm">
                           <p className="text-blue-700">
-                            <span className="font-medium">Torque Nominal:</span> {resultado.couplingModel.torqueNm} Nm
+                            <span className="font-medium">Torque Nominal Equipo:</span> {resultado.calculatedTorqueNm} Nm
                           </p>
                           <p className="text-blue-700">
-                            <span className="font-medium">Torque Requerido:</span> {resultado.calculatedTorqueNm} Nm
+                            <span className="font-medium">Torque Máx Acoplamiento:</span> {resultado.couplingModel.torqueNm} Nm
                           </p>
                           <p className="text-blue-700">
                             <span className="font-medium">RPM Máx:</span> {resultado.couplingModel.maxRPM}
@@ -436,13 +436,13 @@ function AcoplamientoApp() {
               <div style={{ backgroundColor: '#f9fafb', borderRadius: '8px', padding: '15px' }}>
                 <h4 style={{ color: '#134e4a', fontSize: '16px', margin: '0 0 15px 0' }}>Datos Calculados</h4>
                 <div style={{ fontSize: '14px', color: '#666' }}>
-                  <p style={{ margin: '8px 0' }}><strong>Factor de Servicio:</strong> {resultado.factorServicio}</p>
+                  <p style={{ margin: '8px 0' }}><strong>Factor de Servicio Resultante:</strong> {resultado.factorServicio}</p>
                   {resultado.calculatedTorqueNm && (
-                    <p style={{ margin: '8px 0' }}><strong>Torque Requerido:</strong> {resultado.calculatedTorqueNm} Nm</p>
+                    <p style={{ margin: '8px 0' }}><strong>Torque Nominal Equipo:</strong> {resultado.calculatedTorqueNm} Nm</p>
                   )}
                   {resultado.couplingModel && (
                     <>
-                      <p style={{ margin: '8px 0' }}><strong>Torque Nominal:</strong> {resultado.couplingModel.torqueNm} Nm</p>
+                      <p style={{ margin: '8px 0' }}><strong>Torque Máx Acoplamiento:</strong> {resultado.couplingModel.torqueNm} Nm</p>
                       <p style={{ margin: '8px 0' }}><strong>RPM Máximo:</strong> {resultado.couplingModel.maxRPM}</p>
                       <p style={{ margin: '8px 0' }}><strong>Diámetro Máx:</strong> {resultado.couplingModel.boreDiameterMax} mm</p>
                     </>
