@@ -11,6 +11,8 @@ export interface AcoplamientoResult {
   ventajas: string[];
   couplingModel?: CouplingModel;
   calculatedTorqueNm?: number;
+  couplingCode?: string;
+  masaType?: string;
 }
 
 export interface FormData {
@@ -25,168 +27,140 @@ export interface FormData {
 /**
  * Calculates the most appropriate coupling based on equipment specifications
  * 
- * This function analyzes the input parameters and determines the best coupling type
- * based on power, speed, shaft diameters, and other equipment characteristics.
+ * Simplified logic:
+ * 1. Calculate required torque using FUNDAL formula
+ * 2. Find smallest coupling where torque > required, RPM > user RPM, shaft sizes match
+ * 3. If fuse is required, only select from fuse-capable models
  * 
  * @param data - Form data containing all equipment specifications
  * @returns AcoplamientoResult - The recommended coupling with calculated service factor
  */
 export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
-  const { especificaciones, distanciador, applicationId, subApplication, serviceFactor } = data;
+  const { especificaciones, serviceFactor } = data;
   
-  // Convert power to HP for standardized calculations
+  // Convert power to HP if needed (kW to HP: multiply by 1.341)
   const powerHP = especificaciones.hp_or_kw 
-    ? especificaciones.potencia * 1.341 // kW to HP conversion
+    ? especificaciones.potencia * 1.341 
     : especificaciones.potencia;
   
-  const rpm = parseFloat(especificaciones.velocidad_rpm) || 0;
+  const rpm = parseFloat(especificaciones.velocidad_rpm) || 1500;
   const conductorDiameter = parseFloat(especificaciones.eje_conductor) || 0;
   const conducidoDiameter = parseFloat(especificaciones.eje_conducido) || 0;
   
-  // Use service factor from CSV if available, otherwise calculate
-  let finalServiceFactor = serviceFactor || calculateBaseServiceFactor(powerHP, rpm, applicationId);
+  // Calculate the resultant service factor based on application and equipment characteristics
+  const calculatedServiceFactor = calculateResultantServiceFactor(data);
+  const finalServiceFactor = serviceFactor || calculatedServiceFactor;
   
-  // Apply modifiers based on equipment characteristics only if no CSV service factor provided
-  if (!serviceFactor) {
-    finalServiceFactor = applyEquipmentModifiers(finalServiceFactor, {
-      hasDistanciador: especificaciones.distanciador,
-      hasReductor: especificaciones.reductor,
-      hasFusible: especificaciones.acople,
-      dbse: distanciador?.dbse,
-      shaftDifference: Math.abs(conductorDiameter - conducidoDiameter)
-    });
-  }
+  // Step 1: Calculate required torque using FUNDAL formula
+  // Torque (Nm) = (7026 × HP × FS) / RPM
+  const requiredTorqueNm = (7026 * powerHP * finalServiceFactor) / rpm;
   
-  // Calculate required torque using FUNDAL formula: Torque (Nm) = (7026 × HP) / RPM × FS
-  const calculatedTorqueNm = (7026 * powerHP * finalServiceFactor) / rpm;
-  
-  // Select the appropriate coupling from database
-  const maxShaftDiameter = Math.max(conductorDiameter, conducidoDiameter);
+  // Step 2: Find appropriate coupling
   const selectedCoupling = selectCoupling(
-    calculatedTorqueNm,
-    maxShaftDiameter,
+    requiredTorqueNm,
+    conductorDiameter,
+    conducidoDiameter,
     especificaciones.distanciador,
-    especificaciones.acople,
+    especificaciones.acople, // This is the fuse requirement
     rpm
   );
   
-  // Determine coupling type based on specifications
-  const couplingType = determineCouplingType({
-    serviceFactor: finalServiceFactor,
-    powerHP,
-    rpm,
-    hasFusible: especificaciones.acople,
-    hasDistanciador: especificaciones.distanciador,
-    maxShaftDiameter,
-    selectedCoupling
-  });
+  if (!selectedCoupling) {
+    // No suitable coupling found, return error result
+    return {
+      id: 0,
+      name: "No se encontró acoplamiento adecuado",
+      image: getImagePath("/Acoples render/FA.png"),
+      factorServicio: finalServiceFactor,
+      description: "No se encontró un acoplamiento que cumpla con los requisitos especificados. Por favor, verifique los parámetros ingresados.",
+      ventajas: [],
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10
+    };
+  }
   
-  // Create enhanced description if we have sub-application info
-  const enhancedDescription = subApplication 
-    ? `${couplingType.description} Optimizado para aplicaciones de ${subApplication.toLowerCase()}.`
-    : couplingType.description;
+  // Step 3: Generate coupling code based on catalog format
+  const couplingCode = generateCouplingCode(selectedCoupling, especificaciones.acople, especificaciones.distanciador);
+  
+  // Determine coupling type and characteristics
+  const couplingDetails = getCouplingDetails(selectedCoupling, especificaciones.acople, especificaciones.distanciador);
   
   return {
-    id: couplingType.id,
-    name: couplingType.name,
-    image: couplingType.image,
-    factorServicio: Math.round(finalServiceFactor * 100) / 100, // Round to 2 decimal places
-    description: enhancedDescription,
-    ventajas: couplingType.ventajas,
-    couplingModel: selectedCoupling || undefined,
-    calculatedTorqueNm: Math.round(calculatedTorqueNm * 10) / 10 // Round to 1 decimal place
+    id: parseInt(selectedCoupling.model.match(/\d+/)?.[0] || '1'),
+    name: `${couplingDetails.name} - ${selectedCoupling.model}`,
+    image: couplingDetails.image,
+    factorServicio: Math.round(calculatedServiceFactor * 100) / 100, // Show resultant, not final
+    description: couplingDetails.description,
+    ventajas: couplingDetails.ventajas,
+    couplingModel: selectedCoupling,
+    calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+    couplingCode: couplingCode,
+    masaType: (selectedCoupling as any).recommendedMasaType
   };
 }
 
 /**
- * Calculates base service factor based on power, RPM and application type
+ * Calculates the resultant service factor based on application and equipment characteristics
  */
-function calculateBaseServiceFactor(powerHP: number, rpm: number, applicationId?: number): number {
-  // Base factor starts at 1.0
+function calculateResultantServiceFactor(data: FormData): number {
+  const { especificaciones, applicationId, distanciador } = data;
+  
+  // Convert power to HP if needed
+  const powerHP = especificaciones.hp_or_kw 
+    ? especificaciones.potencia * 1.341 
+    : especificaciones.potencia;
+  
+  const rpm = parseFloat(especificaciones.velocidad_rpm) || 1500;
+  const conductorDiameter = parseFloat(especificaciones.eje_conductor) || 0;
+  const conducidoDiameter = parseFloat(especificaciones.eje_conducido) || 0;
+  
+  // Start with base factor
   let factor = 1.0;
   
-  // Power factor (higher power = higher service factor)
+  // Power-based factor
   if (powerHP > 100) factor += 0.3;
   else if (powerHP > 50) factor += 0.2;
   else if (powerHP > 20) factor += 0.1;
   
-  // Speed factor (higher RPM = higher service factor)
+  // RPM-based factor
   if (rpm > 3600) factor += 0.4;
   else if (rpm > 1800) factor += 0.2;
   else if (rpm > 900) factor += 0.1;
   
-  // Application-specific factors
+  // Application-specific factors (based on applicationId)
   if (applicationId) {
     switch (applicationId) {
-      case 1: // Extrusoras
-        factor += 0.3;
-        break;
-      case 2: // Trituradores
-        factor += 0.5;
-        break;
-      case 3: // Compresores
-        factor += 0.2;
-        break;
-      case 4: // Cintas Transportadoras
-        factor += 0.15;
-        break;
-      case 5: // Sopladores y Ventiladores
-        factor += 0.1;
-        break;
-      case 6: // Generadores
-        factor += 0.1;
-        break;
-      case 7: // Guinches y puentes grúa
-        factor += 0.4;
-        break;
-      case 8: // Trenes de laminación
-        factor += 0.6;
-        break;
-      case 9: // Bombas
-        factor += 0.2;
-        break;
-      case 10: // Máquina motriz
-        factor += 0.25;
-        break;
-      default:
-        factor += 0.1;
+      case 1: factor += 0.3; break; // Extrusoras
+      case 2: factor += 0.5; break; // Trituradores  
+      case 3: factor += 0.2; break; // Compresores
+      case 4: factor += 0.15; break; // Cintas Transportadoras
+      case 5: factor += 0.1; break; // Sopladores y Ventiladores
+      case 6: factor += 0.1; break; // Generadores
+      case 7: factor += 0.4; break; // Guinches y puentes grúa
+      case 8: factor += 0.6; break; // Trenes de laminación
+      case 9: factor += 0.2; break; // Bombas
+      case 10: factor += 0.25; break; // Máquina motriz
+      default: factor += 0.1; break;
     }
   }
   
-  return factor;
-}
-
-/**
- * Applies modifiers to service factor based on equipment characteristics
- */
-function applyEquipmentModifiers(baseFactor: number, modifiers: {
-  hasDistanciador: boolean;
-  hasReductor: boolean;
-  hasFusible: boolean;
-  dbse?: string;
-  shaftDifference: number;
-}): number {
-  let factor = baseFactor;
-  
-  // Spacer modifier
-  if (modifiers.hasDistanciador) {
+  // Equipment characteristic modifiers
+  if (especificaciones.distanciador) {
     factor += 0.1;
-    const dbse = parseFloat(modifiers.dbse || '0');
+    const dbse = parseFloat(distanciador?.dbse || '0');
     if (dbse > 100) factor += 0.05;
   }
   
-  // Reducer modifier
-  if (modifiers.hasReductor) {
+  if (especificaciones.reductor) {
     factor += 0.15;
   }
   
-  // Fusible system modifier
-  if (modifiers.hasFusible) {
+  if (especificaciones.acople) {
     factor += 0.1;
   }
   
   // Shaft diameter difference modifier
-  if (modifiers.shaftDifference > 10) {
+  const shaftDifference = Math.abs(conductorDiameter - conducidoDiameter);
+  if (shaftDifference > 10) {
     factor += 0.05;
   }
   
@@ -194,172 +168,180 @@ function applyEquipmentModifiers(baseFactor: number, modifiers: {
 }
 
 /**
- * Determines the appropriate coupling type based on calculated parameters
+ * Generates the coupling code based on catalog format
  */
-function determineCouplingType(params: {
-  serviceFactor: number;
-  powerHP: number;
-  rpm: number;
-  hasFusible: boolean;
-  hasDistanciador: boolean;
-  maxShaftDiameter: number;
-  selectedCoupling: CouplingModel | null;
-}): {
-  id: number;
+function generateCouplingCode(coupling: CouplingModel, hasFuse: boolean, _hasSpacerr: boolean): string {
+  const baseModel = coupling.model.replace(/\s+/g, ' ');
+  const masaCode = (coupling as any).recommendedMasaCode || '';
+  
+  // For FA series with fuse, format is "FA X / FUS / 1*"
+  if (coupling.series === 'FA/FUS') {
+    const modelNumber = baseModel.match(/\d+/)?.[0];
+    return `FA ${modelNumber} / FUS${masaCode}`;
+  }
+  
+  // For FA series with spacer, format is "FA X / D 130 / 1*"
+  if (coupling.series === 'FA/D') {
+    const modelNumber = baseModel.match(/\d+/)?.[0];
+    return `FA ${modelNumber} / D 130${masaCode}`;
+  }
+  
+  // For FA series with cardan, format is "FA X / C 11 ½*"
+  if (coupling.series === 'FA/C') {
+    const modelNumber = baseModel.match(/\d+/)?.[0];
+    return `FA ${modelNumber} / C 11 ½`;
+  }
+  
+  // For standard FA series, format is "FA X / 1*" with masa code
+  if (coupling.series === 'FA') {
+    const modelNumber = baseModel.match(/\d+/)?.[0];
+    return `FA ${modelNumber}${masaCode}`;
+  }
+  
+  // For FAS NG series
+  if (coupling.series === 'FAS NG') {
+    return `${baseModel}`;
+  }
+  
+  // For FAS NG-LP series
+  if (coupling.series === 'FAS NG-LP') {
+    const modelNumber = baseModel.match(/FAS NG \d+ LP/)?.[0];
+    if (hasFuse) {
+      return `${modelNumber} -FUS`;
+    }
+    return `${modelNumber}`;
+  }
+  
+  return baseModel;
+}
+
+/**
+ * Gets coupling details based on the selected model
+ */
+function getCouplingDetails(coupling: CouplingModel, hasFuse: boolean, _hasSpacerr: boolean): {
   name: string;
   image: string;
   description: string;
   ventajas: string[];
 } {
-  const { serviceFactor, powerHP, hasFusible, hasDistanciador, selectedCoupling } = params;
+  const series = coupling.series;
   
-  // Include coupling model information if available
-  const modelName = selectedCoupling ? ` - Modelo ${selectedCoupling.model}` : '';
-  
-  // Determine image based on coupling series and characteristics
-  let couplingImage = getImagePath("/Acoples render/FA.png"); // Default FA series
-  let couplingName = "Acoplamiento FUNDAL FA";
-  let couplingDescription = "Acoplamiento flexible estándar para transmisión de potencia industrial.";
-  let couplingAdvantages = [
-    "Alta performance operacional",
-    "Vida útil prolongada",
-    "Estabilidad dinámica",
-    "Eficiencia en la transmisión de potencia"
-  ];
-
-  // Determine coupling type based on selected model or characteristics
-  if (selectedCoupling) {
-    const series = selectedCoupling.series;
-    
-    switch (series) {
-      case 'FA':
-        couplingImage = getImagePath("/Acoples render/FA.png");
-        couplingName = `Acoplamiento FUNDAL FA${modelName}`;
-        couplingDescription = "Acoplamiento flexible estándar FUNDAL FA para transmisión confiable de potencia en aplicaciones industriales.";
-        couplingAdvantages = [
+  switch (series) {
+    case 'FA':
+      return {
+        name: "Acoplamiento FUNDAL FA",
+        image: getImagePath("/Acoples render/FA.png"),
+        description: "Acoplamiento flexible estándar FUNDAL FA para transmisión confiable de potencia en aplicaciones industriales.",
+        ventajas: [
           "Alta performance operacional",
           "Vida útil prolongada",
           "Estabilidad dinámica excepcional",
           "Eficiencia máxima en transmisión"
-        ];
-        break;
-        
-      case 'FA/D':
-        couplingImage = getImagePath("/Acoples render/FA-D.png");
-        couplingName = `Acoplamiento con Distanciador FA/D${modelName}`;
-        couplingDescription = "Acoplamiento FUNDAL FA/D con distanciador para aplicaciones que requieren separación entre ejes.";
-        couplingAdvantages = [
+        ]
+      };
+      
+    case 'FA/D':
+      return {
+        name: "Acoplamiento con Distanciador FA/D",
+        image: getImagePath("/Acoples render/FA-D.png"),
+        description: "Acoplamiento FUNDAL FA/D con distanciador para aplicaciones que requieren separación entre ejes.",
+        ventajas: [
           "Compensación de desalineamientos",
           "Flexibilidad de instalación",
           "Fácil acceso para mantenimiento",
           "Transmisión suave de potencia"
-        ];
-        break;
-        
-      case 'FA/C':
-        couplingImage = getImagePath("/Acoples render/FA-C.png");
-        couplingName = `Acoplamiento Cardánico FA/C${modelName}`;
-        couplingDescription = "Acoplamiento FUNDAL FA/C con cardán para aplicaciones con grandes desalineamientos angulares.";
-        couplingAdvantages = [
+        ]
+      };
+      
+    case 'FA/C':
+      return {
+        name: "Acoplamiento Cardánico FA/C",
+        image: getImagePath("/Acoples render/FA-C.png"),
+        description: "Acoplamiento FUNDAL FA/C con cardán para aplicaciones con grandes desalineamientos angulares.",
+        ventajas: [
           "Permite desalineamientos angulares",
           "Transmisión directa de movimiento",
           "Diseño robusto y confiable",
           "Ideal para aplicaciones especiales"
-        ];
-        break;
-        
-      case 'FA/FUS':
-        couplingImage = getImagePath("/Acoples render/FA-FUS.png");
-        couplingName = `Acoplamiento Fusible FA/FUS${modelName}`;
-        couplingDescription = "Acoplamiento FUNDAL FA/FUS con protección fusible para evitar daños por sobrecargas.";
-        couplingAdvantages = [
+        ]
+      };
+      
+    case 'FA/FUS':
+      return {
+        name: "Acoplamiento Fusible FA/FUS",
+        image: getImagePath("/Acoples render/FA-FUS.png"),
+        description: "Acoplamiento FUNDAL FA/FUS con protección fusible para evitar daños por sobrecargas.",
+        ventajas: [
           "Protección fusible contra sobrecargas",
           "Previene daños en equipos",
           "Mantenimiento preventivo simplificado",
           "Seguridad operacional máxima"
-        ];
-        break;
-        
-      case 'FAS NG':
-        if (selectedCoupling.torqueNm > 50000) {
-          couplingImage = getImagePath("/Acoples render/FAS-NG-H.png");
-          couplingName = `Acoplamiento FAS NG Heavy Duty${modelName}`;
-          couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación para aplicaciones de alta potencia.";
-        } else {
-          couplingImage = getImagePath("/Acoples render/FAS-NG.png");
-          couplingName = `Acoplamiento FAS NG${modelName}`;
-          couplingDescription = "Acoplamiento FUNDAL FAS NG de nueva generación con tecnología avanzada.";
-        }
-        couplingAdvantages = [
+        ]
+      };
+      
+    case 'FAS NG':
+      if (coupling.torqueNm > 50000) {
+        return {
+          name: "Acoplamiento FAS NG Heavy Duty",
+          image: getImagePath("/Acoples render/FAS-NG-H.png"),
+          description: "Acoplamiento FUNDAL FAS NG de nueva generación para aplicaciones de alta potencia.",
+          ventajas: [
+            "Tecnología de nueva generación",
+            "Mayor capacidad de transmisión",
+            "Sin necesidad de lubricación",
+            "Facilidad de mantenimiento excepcional"
+          ]
+        };
+      }
+      return {
+        name: "Acoplamiento FAS NG",
+        image: getImagePath("/Acoples render/FAS-NG.png"),
+        description: "Acoplamiento FUNDAL FAS NG de nueva generación con tecnología avanzada.",
+        ventajas: [
           "Tecnología de nueva generación",
           "Mayor capacidad de transmisión",
           "Sin necesidad de lubricación",
-          "Facilidad de mantenimiento exceptional"
-        ];
-        break;
-        
-      case 'FAS NG-LP':
-        if (hasFusible) {
-          couplingImage = getImagePath("/Acoples render/FAS-NG-LP-FUS.png");
-          couplingName = `Acoplamiento FAS NG-LP con Fusible${modelName}`;
-          couplingDescription = "Acoplamiento FUNDAL FAS NG-LP de gran potencia con protección fusible integrada.";
-        } else {
-          couplingImage = getImagePath("/Acoples render/FAS-NG-LP.png");
-          couplingName = `Acoplamiento FAS NG-LP${modelName}`;
-          couplingDescription = "Acoplamiento FUNDAL FAS NG-LP para aplicaciones de gran potencia y torque elevado.";
-        }
-        couplingAdvantages = [
+          "Facilidad de mantenimiento excepcional"
+        ]
+      };
+      
+    case 'FAS NG-LP':
+      if (hasFuse) {
+        return {
+          name: "Acoplamiento FAS NG-LP con Fusible",
+          image: getImagePath("/Acoples render/FAS-NG-LP-FUS.png"),
+          description: "Acoplamiento FUNDAL FAS NG-LP de gran potencia con protección fusible integrada.",
+          ventajas: [
+            "Diseño para grandes potencias",
+            "Capacidad de torque excepcional",
+            "Protección fusible integrada",
+            "Diseño compacto y liviano"
+          ]
+        };
+      }
+      return {
+        name: "Acoplamiento FAS NG-LP",
+        image: getImagePath("/Acoples render/FAS-NG-LP.png"),
+        description: "Acoplamiento FUNDAL FAS NG-LP para aplicaciones de gran potencia y torque elevado.",
+        ventajas: [
           "Diseño para grandes potencias",
           "Capacidad de torque excepcional",
           "Robustez y alta rentabilidad",
           "Diseño compacto y liviano"
-        ];
-        break;
-        
-      default:
-        // Keep default values
-        break;
-    }
-  } else {
-    // Fallback logic when no specific coupling is selected
-    if (hasFusible) {
-      couplingImage = getImagePath("/Acoples render/FA-FUS.png");
-      couplingName = "Acoplamiento Fusible FA-FUS";
-      couplingDescription = "Acoplamiento fusible recomendado para protección contra sobrecargas.";
-      couplingAdvantages = [
-        "Protección fusible confiable",
-        "Previene daños por sobrecarga",
-        "Instalación sencilla",
-        "Mantenimiento mínimo"
-      ];
-    } else if (hasDistanciador) {
-      couplingImage = getImagePath("/Acoples render/FA-D.png");
-      couplingName = "Acoplamiento con Distanciador FA-D";
-      couplingDescription = "Acoplamiento con distanciador para separación entre ejes.";
-      couplingAdvantages = [
-        "Compensación de desalineamientos",
-        "Flexibilidad de instalación",
-        "Fácil acceso para mantenimiento",
-        "Transmisión suave de potencia"
-      ];
-    } else if (powerHP > 500 || serviceFactor > 2.5) {
-      couplingImage = getImagePath("/Acoples render/FAS-NG.png");
-      couplingName = "Acoplamiento FAS NG";
-      couplingDescription = "Acoplamiento de nueva generación para altas potencias y factores de servicio elevados.";
-      couplingAdvantages = [
-        "Tecnología avanzada",
-        "Mayor capacidad de transmisión",
-        "Sin necesidad de lubricación",
-        "Mantenimiento simplificado"
-      ];
-    }
+        ]
+      };
+      
+    default:
+      return {
+        name: "Acoplamiento FUNDAL",
+        image: getImagePath("/Acoples render/FA.png"),
+        description: "Acoplamiento flexible para transmisión de potencia industrial.",
+        ventajas: [
+          "Alta performance operacional",
+          "Vida útil prolongada",
+          "Estabilidad dinámica",
+          "Eficiencia en la transmisión"
+        ]
+      };
   }
-  
-  return {
-    id: selectedCoupling ? parseInt(selectedCoupling.model.split(' ')[1]) || 1 : 1,
-    name: couplingName,
-    image: couplingImage,
-    description: couplingDescription,
-    ventajas: couplingAdvantages
-  };
 }

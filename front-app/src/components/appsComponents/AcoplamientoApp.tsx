@@ -135,16 +135,23 @@ function AcoplamientoApp() {
                   {/* Service Factor and Torque Display */}
                   <div className="space-y-4">
                     <div className="bg-teal-50 rounded-lg p-4 border border-teal-200">
-                      <p className="text-teal-700 font-medium text-sm">Factor de Servicio</p>
+                      <p className="text-teal-700 font-medium text-sm">Factor de Servicio Resultante</p>
                       <p className="text-2xl font-bold text-teal-900 mt-1" style={{ fontFamily: 'Poppins' }}>{resultado.factorServicio}</p>
                     </div>
                     
                     {resultado.couplingModel && (
                       <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                         <p className="text-blue-700 font-medium text-sm mb-2">Modelo Seleccionado</p>
-                        <p className="text-xl font-bold text-blue-900" style={{ fontFamily: 'Poppins' }}>
-                          {resultado.couplingModel.model}
-                        </p>
+                        {resultado.couplingCode && (
+                          <p className="text-xl font-bold text-blue-900" style={{ fontFamily: 'Poppins' }}>
+                            {resultado.couplingCode}
+                          </p>
+                        )}
+                        {resultado.masaType && (
+                          <p className="text-sm font-medium text-blue-700 mt-1" style={{ fontFamily: 'Poppins' }}>
+                            Masa: {resultado.masaType}
+                          </p>
+                        )}
                         <div className="mt-3 space-y-1 text-sm">
                           <p className="text-blue-700">
                             <span className="font-medium">Torque Nominal:</span> {resultado.couplingModel.torqueNm} Nm

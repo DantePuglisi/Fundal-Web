@@ -4,39 +4,134 @@ export interface CouplingModel {
   series: string;
   torqueNm: number;
   maxRPM: number;
-  boreDiameterMin: number;
-  boreDiameterMax: number;
+  // For FA models - only masa types matter, no overall bore diameter
+  masaConvencionalMin?: number;
+  masaConvencionalMax?: number;
+  masaLlenaMin?: number;
+  masaLlenaMax?: number;
+  // Legacy fields for non-FA series compatibility
+  boreDiameterMin?: number;
+  boreDiameterMax?: number;
   weight?: number;
 }
 
 // FA Series - Standard Couplings
+// Based on cleaned CSV data from FUNDAL catalog - ONLY masa types matter
 export const FA_SERIES: CouplingModel[] = [
-  { model: "FA 1", series: "FA", torqueNm: 29, maxRPM: 3750, boreDiameterMin: 15, boreDiameterMax: 28 },
-  { model: "FA 2", series: "FA", torqueNm: 44, maxRPM: 3750, boreDiameterMin: 24, boreDiameterMax: 36 },
-  { model: "FA 3", series: "FA", torqueNm: 89, maxRPM: 3750, boreDiameterMin: 32, boreDiameterMax: 48 },
-  { model: "FA 4", series: "FA", torqueNm: 373, maxRPM: 3750, boreDiameterMin: 45, boreDiameterMax: 68 },
-  { model: "FA 5", series: "FA", torqueNm: 755, maxRPM: 3000, boreDiameterMin: 55, boreDiameterMax: 87 },
-  { model: "FA 6", series: "FA", torqueNm: 1059, maxRPM: 3000, boreDiameterMin: 70, boreDiameterMax: 90 },
-  { model: "FA 7", series: "FA", torqueNm: 2030, maxRPM: 2500, boreDiameterMin: 75, boreDiameterMax: 112 },
-  { model: "FA 8", series: "FA", torqueNm: 2599, maxRPM: 2300, boreDiameterMin: 87, boreDiameterMax: 125 },
-  { model: "FA 9", series: "FA", torqueNm: 7063, maxRPM: 1800, boreDiameterMin: 118, boreDiameterMax: 160 },
-  { model: "FA 10", series: "FA", torqueNm: 11821, maxRPM: 1500, boreDiameterMin: 143, boreDiameterMax: 180 },
-  { model: "FA 11", series: "FA", torqueNm: 21915, maxRPM: 1200, boreDiameterMin: 175, boreDiameterMax: 220 }
+  { 
+    model: "FA 1", series: "FA", torqueNm: 29, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 15,
+    masaLlenaMin: 0, masaLlenaMax: 28
+  },
+  { 
+    model: "FA 2", series: "FA", torqueNm: 44, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 24,
+    masaLlenaMin: 0, masaLlenaMax: 36
+  },
+  { 
+    model: "FA 3", series: "FA", torqueNm: 89, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 32,
+    masaLlenaMin: 0, masaLlenaMax: 48
+  },
+  { 
+    model: "FA 4", series: "FA", torqueNm: 373, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 45,
+    masaLlenaMin: 0, masaLlenaMax: 68
+  },
+  { 
+    model: "FA 5", series: "FA", torqueNm: 755, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 55,
+    masaLlenaMin: 0, masaLlenaMax: 87
+  },
+  { 
+    model: "FA 6", series: "FA", torqueNm: 1059, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 70,
+    masaLlenaMin: 0, masaLlenaMax: 90
+  },
+  { 
+    model: "FA 7", series: "FA", torqueNm: 2030, maxRPM: 2500,
+    masaConvencionalMin: 30, masaConvencionalMax: 75,
+    masaLlenaMin: 40, masaLlenaMax: 112
+  },
+  { 
+    model: "FA 8", series: "FA", torqueNm: 2599, maxRPM: 2300,
+    masaConvencionalMin: 35, masaConvencionalMax: 87,
+    masaLlenaMin: 80, masaLlenaMax: 125
+  },
+  { 
+    model: "FA 9", series: "FA", torqueNm: 7063, maxRPM: 1800,
+    masaConvencionalMin: 40, masaConvencionalMax: 118,
+    masaLlenaMin: 100, masaLlenaMax: 160
+  },
+  { 
+    model: "FA 10", series: "FA", torqueNm: 11821, maxRPM: 1500,
+    masaConvencionalMin: 60, masaConvencionalMax: 143,
+    masaLlenaMin: 110, masaLlenaMax: 180
+  },
+  { 
+    model: "FA 11", series: "FA", torqueNm: 21915, maxRPM: 1200,
+    masaConvencionalMin: 80, masaConvencionalMax: 175,
+    masaLlenaMin: 150, masaLlenaMax: 220
+  }
 ];
 
-// FA/D Series - With Spacer (same torque capacity as FA)
+// FA/D Series - With Spacer (same masa ranges as FA)
 export const FAD_SERIES: CouplingModel[] = [
-  { model: "FA 1 D", series: "FA/D", torqueNm: 29, maxRPM: 3750, boreDiameterMin: 15, boreDiameterMax: 28 },
-  { model: "FA 2 D", series: "FA/D", torqueNm: 44, maxRPM: 3750, boreDiameterMin: 24, boreDiameterMax: 36 },
-  { model: "FA 3 D", series: "FA/D", torqueNm: 89, maxRPM: 3750, boreDiameterMin: 32, boreDiameterMax: 48 },
-  { model: "FA 4 D", series: "FA/D", torqueNm: 373, maxRPM: 3750, boreDiameterMin: 45, boreDiameterMax: 68 },
-  { model: "FA 5 D", series: "FA/D", torqueNm: 755, maxRPM: 3000, boreDiameterMin: 55, boreDiameterMax: 87 },
-  { model: "FA 6 D", series: "FA/D", torqueNm: 1059, maxRPM: 3000, boreDiameterMin: 70, boreDiameterMax: 90 },
-  { model: "FA 7 D", series: "FA/D", torqueNm: 2030, maxRPM: 2500, boreDiameterMin: 75, boreDiameterMax: 112 },
-  { model: "FA 8 D", series: "FA/D", torqueNm: 2599, maxRPM: 2300, boreDiameterMin: 87, boreDiameterMax: 125 },
-  { model: "FA 9 D", series: "FA/D", torqueNm: 7063, maxRPM: 1800, boreDiameterMin: 118, boreDiameterMax: 160 },
-  { model: "FA 10 D", series: "FA/D", torqueNm: 11821, maxRPM: 1500, boreDiameterMin: 143, boreDiameterMax: 180 },
-  { model: "FA 11 D", series: "FA/D", torqueNm: 21915, maxRPM: 1200, boreDiameterMin: 175, boreDiameterMax: 220 }
+  { 
+    model: "FA 1 D", series: "FA/D", torqueNm: 29, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 15,
+    masaLlenaMin: 0, masaLlenaMax: 28
+  },
+  { 
+    model: "FA 2 D", series: "FA/D", torqueNm: 44, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 24,
+    masaLlenaMin: 0, masaLlenaMax: 36
+  },
+  { 
+    model: "FA 3 D", series: "FA/D", torqueNm: 89, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 32,
+    masaLlenaMin: 0, masaLlenaMax: 48
+  },
+  { 
+    model: "FA 4 D", series: "FA/D", torqueNm: 373, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 45,
+    masaLlenaMin: 0, masaLlenaMax: 68
+  },
+  { 
+    model: "FA 5 D", series: "FA/D", torqueNm: 755, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 55,
+    masaLlenaMin: 0, masaLlenaMax: 87
+  },
+  { 
+    model: "FA 6 D", series: "FA/D", torqueNm: 1059, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 70,
+    masaLlenaMin: 0, masaLlenaMax: 90
+  },
+  { 
+    model: "FA 7 D", series: "FA/D", torqueNm: 2030, maxRPM: 2500,
+    masaConvencionalMin: 30, masaConvencionalMax: 75,
+    masaLlenaMin: 40, masaLlenaMax: 112
+  },
+  { 
+    model: "FA 8 D", series: "FA/D", torqueNm: 2599, maxRPM: 2300,
+    masaConvencionalMin: 35, masaConvencionalMax: 87,
+    masaLlenaMin: 80, masaLlenaMax: 125
+  },
+  { 
+    model: "FA 9 D", series: "FA/D", torqueNm: 7063, maxRPM: 1800,
+    masaConvencionalMin: 40, masaConvencionalMax: 118,
+    masaLlenaMin: 100, masaLlenaMax: 160
+  },
+  { 
+    model: "FA 10 D", series: "FA/D", torqueNm: 11821, maxRPM: 1500,
+    masaConvencionalMin: 60, masaConvencionalMax: 143,
+    masaLlenaMin: 110, masaLlenaMax: 180
+  },
+  { 
+    model: "FA 11 D", series: "FA/D", torqueNm: 21915, maxRPM: 1200,
+    masaConvencionalMin: 80, masaConvencionalMax: 175,
+    masaLlenaMin: 150, masaLlenaMax: 220
+  }
 ];
 
 // FA/C Series - With Cardan
@@ -51,17 +146,53 @@ export const FAC_SERIES: CouplingModel[] = [
   { model: "FA 11 C", series: "FA/C", torqueNm: 21915, maxRPM: 435, boreDiameterMin: 140, boreDiameterMax: 185 }
 ];
 
-// FA/FUS Series - With Fusible Protection
+// FA/FUS Series - With Fusible Protection (same masa ranges as FA)
 export const FAFUS_SERIES: CouplingModel[] = [
-  { model: "FA 3 FUS", series: "FA/FUS", torqueNm: 89, maxRPM: 3750, boreDiameterMin: 35, boreDiameterMax: 94 },
-  { model: "FA 4 FUS", series: "FA/FUS", torqueNm: 373, maxRPM: 3750, boreDiameterMin: 50, boreDiameterMax: 124 },
-  { model: "FA 5 FUS", series: "FA/FUS", torqueNm: 755, maxRPM: 3000, boreDiameterMin: 60, boreDiameterMax: 150 },
-  { model: "FA 6 FUS", series: "FA/FUS", torqueNm: 1059, maxRPM: 3000, boreDiameterMin: 75, boreDiameterMax: 168 },
-  { model: "FA 7 FUS", series: "FA/FUS", torqueNm: 2030, maxRPM: 2500, boreDiameterMin: 80, boreDiameterMax: 212 },
-  { model: "FA 8 FUS", series: "FA/FUS", torqueNm: 2599, maxRPM: 2300, boreDiameterMin: 100, boreDiameterMax: 235 },
-  { model: "FA 9 FUS", series: "FA/FUS", torqueNm: 7063, maxRPM: 1800, boreDiameterMin: 110, boreDiameterMax: 287 },
-  { model: "FA 10 FUS", series: "FA/FUS", torqueNm: 11821, maxRPM: 1500, boreDiameterMin: 130, boreDiameterMax: 355 },
-  { model: "FA 11 FUS", series: "FA/FUS", torqueNm: 21915, maxRPM: 1200, boreDiameterMin: 150, boreDiameterMax: 435 }
+  { 
+    model: "FA 3 FUS", series: "FA/FUS", torqueNm: 89, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 32,
+    masaLlenaMin: 0, masaLlenaMax: 48
+  },
+  { 
+    model: "FA 4 FUS", series: "FA/FUS", torqueNm: 373, maxRPM: 3750,
+    masaConvencionalMin: 0, masaConvencionalMax: 45,
+    masaLlenaMin: 0, masaLlenaMax: 68
+  },
+  { 
+    model: "FA 5 FUS", series: "FA/FUS", torqueNm: 755, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 55,
+    masaLlenaMin: 0, masaLlenaMax: 87
+  },
+  { 
+    model: "FA 6 FUS", series: "FA/FUS", torqueNm: 1059, maxRPM: 3000,
+    masaConvencionalMin: 0, masaConvencionalMax: 70,
+    masaLlenaMin: 0, masaLlenaMax: 90
+  },
+  { 
+    model: "FA 7 FUS", series: "FA/FUS", torqueNm: 2030, maxRPM: 2500,
+    masaConvencionalMin: 30, masaConvencionalMax: 75,
+    masaLlenaMin: 40, masaLlenaMax: 112
+  },
+  { 
+    model: "FA 8 FUS", series: "FA/FUS", torqueNm: 2599, maxRPM: 2300,
+    masaConvencionalMin: 35, masaConvencionalMax: 87,
+    masaLlenaMin: 80, masaLlenaMax: 125
+  },
+  { 
+    model: "FA 9 FUS", series: "FA/FUS", torqueNm: 7063, maxRPM: 1800,
+    masaConvencionalMin: 40, masaConvencionalMax: 118,
+    masaLlenaMin: 100, masaLlenaMax: 160
+  },
+  { 
+    model: "FA 10 FUS", series: "FA/FUS", torqueNm: 11821, maxRPM: 1500,
+    masaConvencionalMin: 60, masaConvencionalMax: 143,
+    masaLlenaMin: 110, masaLlenaMax: 180
+  },
+  { 
+    model: "FA 11 FUS", series: "FA/FUS", torqueNm: 21915, maxRPM: 1200,
+    masaConvencionalMin: 80, masaConvencionalMax: 175,
+    masaLlenaMin: 150, masaLlenaMax: 220
+  }
 ];
 
 // FAS NG Series - New Generation
@@ -109,9 +240,80 @@ export const ALL_COUPLINGS: CouplingModel[] = [
 ];
 
 /**
- * Finds the appropriate coupling model based on required torque and shaft diameter
+ * Checks if shaft diameters can fit in a coupling using any masa combination
+ * @param coupling - The coupling to check
+ * @param conductorDiameter - Conductor shaft diameter
+ * @param conducidoDiameter - Conducido shaft diameter
+ * @returns Object with compatibility info and masa type recommendation
+ */
+function checkMasaCompatibility(
+  coupling: CouplingModel, 
+  conductorDiameter: number, 
+  conducidoDiameter: number
+): { isCompatible: boolean; masaType?: string; masaCode?: string } {
+  
+  // For non-FA series, use the existing bore range
+  if (!coupling.series.startsWith('FA') || coupling.series === 'FA/C') {
+    const fits = coupling.boreDiameterMin && coupling.boreDiameterMax &&
+                 conductorDiameter >= coupling.boreDiameterMin && 
+                 conductorDiameter <= coupling.boreDiameterMax &&
+                 conducidoDiameter >= coupling.boreDiameterMin && 
+                 conducidoDiameter <= coupling.boreDiameterMax;
+    return { isCompatible: fits || false };
+  }
+  
+  // For FA series, ONLY check masa ranges (no overall bore diameter)
+  const convMin = coupling.masaConvencionalMin || 0;
+  const convMax = coupling.masaConvencionalMax || 0;
+  const llenaMin = coupling.masaLlenaMin || 0;
+  const llenaMax = coupling.masaLlenaMax || 0;
+  
+  // Check if both shafts fit in masa convencional range
+  if (conductorDiameter >= convMin && conductorDiameter <= convMax &&
+      conducidoDiameter >= convMin && conducidoDiameter <= convMax) {
+    return { 
+      isCompatible: true, 
+      masaType: "Dos masas convencionales",
+      masaCode: "/1" 
+    };
+  }
+  
+  // Check if both shafts fit in masa llena range
+  if (conductorDiameter >= llenaMin && conductorDiameter <= llenaMax &&
+      conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax) {
+    return { 
+      isCompatible: true, 
+      masaType: "Dos masas llenas",
+      masaCode: "/2" 
+    };
+  }
+  
+  // Check if one shaft fits in convencional and the other in llena
+  const oneFitsConv = (conductorDiameter >= convMin && conductorDiameter <= convMax) ||
+                      (conducidoDiameter >= convMin && conducidoDiameter <= convMax);
+  const oneFitsLlena = (conductorDiameter >= llenaMin && conductorDiameter <= llenaMax) ||
+                       (conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax);
+  
+  if (oneFitsConv && oneFitsLlena && 
+      ((conductorDiameter >= convMin && conductorDiameter <= convMax && 
+        conducidoDiameter >= llenaMin && conducidoDiameter <= llenaMax) ||
+       (conducidoDiameter >= convMin && conducidoDiameter <= convMax && 
+        conductorDiameter >= llenaMin && conductorDiameter <= llenaMax))) {
+    return { 
+      isCompatible: true, 
+      masaType: "Una masa convencional y una masa llena",
+      masaCode: "/3" 
+    };
+  }
+  
+  return { isCompatible: false };
+}
+
+/**
+ * Finds the appropriate coupling model based on required torque and shaft diameters
  * @param requiredTorqueNm - The required torque in Nm
- * @param shaftDiameter - The maximum shaft diameter in mm
+ * @param conductorDiameter - Conductor shaft diameter in mm
+ * @param conducidoDiameter - Conducido shaft diameter in mm
  * @param needsSpacerDBSE - Whether a spacer is required
  * @param needsFusible - Whether fusible protection is required
  * @param rpm - Operating RPM
@@ -119,7 +321,8 @@ export const ALL_COUPLINGS: CouplingModel[] = [
  */
 export function selectCoupling(
   requiredTorqueNm: number,
-  shaftDiameter: number,
+  conductorDiameter: number,
+  conducidoDiameter: number,
   needsSpacerDBSE: boolean = false,
   needsFusible: boolean = false,
   rpm: number = 1500
@@ -143,29 +346,45 @@ export function selectCoupling(
     seriesToSearch = FA_SERIES;
   }
   
-  // Find the coupling with adequate torque capacity and shaft bore
-  const suitableCouplings = seriesToSearch.filter(coupling => 
-    coupling.torqueNm >= requiredTorqueNm &&
-    coupling.boreDiameterMax >= shaftDiameter &&
-    coupling.boreDiameterMin <= shaftDiameter &&
-    coupling.maxRPM >= rpm
+  // Find couplings with adequate torque capacity and RPM
+  const torqueCompatibleCouplings = seriesToSearch.filter(coupling => 
+    coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
   );
+  
+  // Check masa compatibility for each coupling
+  const compatibleCouplings = torqueCompatibleCouplings.filter(coupling => {
+    const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
+    if (masaCheck.isCompatible) {
+      // Add masa info to coupling for later use
+      (coupling as any).recommendedMasaType = masaCheck.masaType;
+      (coupling as any).recommendedMasaCode = masaCheck.masaCode;
+      return true;
+    }
+    return false;
+  });
   
   // Return the smallest adequate coupling (most economical)
-  if (suitableCouplings.length > 0) {
-    return suitableCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
+  if (compatibleCouplings.length > 0) {
+    return compatibleCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
   }
   
-  // If no coupling found in preferred series, search all
-  const allSuitableCouplings = ALL_COUPLINGS.filter(coupling => 
-    coupling.torqueNm >= requiredTorqueNm &&
-    coupling.boreDiameterMax >= shaftDiameter &&
-    coupling.boreDiameterMin <= shaftDiameter &&
-    coupling.maxRPM >= rpm
+  // If no coupling found in preferred series, search all series
+  const allTorqueCompatible = ALL_COUPLINGS.filter(coupling => 
+    coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
   );
   
-  if (allSuitableCouplings.length > 0) {
-    return allSuitableCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
+  const allCompatibleCouplings = allTorqueCompatible.filter(coupling => {
+    const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
+    if (masaCheck.isCompatible) {
+      (coupling as any).recommendedMasaType = masaCheck.masaType;
+      (coupling as any).recommendedMasaCode = masaCheck.masaCode;
+      return true;
+    }
+    return false;
+  });
+  
+  if (allCompatibleCouplings.length > 0) {
+    return allCompatibleCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
   }
   
   return null;
