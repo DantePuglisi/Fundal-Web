@@ -210,38 +210,53 @@ export const FAFUS_SERIES: CouplingModel[] = [
   }
 ];
 
-// FAS NG Series - New Generation
+// FAS NG Series - New Generation (Based on Tabla II from FUNDAL catalog)
 export const FASNG_SERIES: CouplingModel[] = [
-  { model: "FAS NG 2", series: "FAS NG", torqueNm: 250, maxRPM: 5000, boreDiameterMin: 35, boreDiameterMax: 58 },
-  { model: "FAS NG 3", series: "FAS NG", torqueNm: 470, maxRPM: 3500, boreDiameterMin: 45, boreDiameterMax: 78 },
-  { model: "FAS NG 4", series: "FAS NG", torqueNm: 1106, maxRPM: 3600, boreDiameterMin: 60, boreDiameterMax: 96 },
-  { model: "FAS NG 5", series: "FAS NG", torqueNm: 2650, maxRPM: 2500, boreDiameterMin: 75, boreDiameterMax: 115 },
-  { model: "FAS NG 6", series: "FAS NG", torqueNm: 3200, maxRPM: 2500, boreDiameterMin: 85, boreDiameterMax: 130 },
-  { model: "FAS NG 7", series: "FAS NG", torqueNm: 6300, maxRPM: 2200, boreDiameterMin: 95, boreDiameterMax: 143 },
-  { model: "FAS NG 8", series: "FAS NG", torqueNm: 7800, maxRPM: 2000, boreDiameterMin: 110, boreDiameterMax: 165 },
-  { model: "FAS NG 9", series: "FAS NG", torqueNm: 13000, maxRPM: 1600, boreDiameterMin: 120, boreDiameterMax: 193 },
-  { model: "FAS NG 10", series: "FAS NG", torqueNm: 45000, maxRPM: 1300, boreDiameterMin: 180, boreDiameterMax: 280 },
-  { model: "FAS NG 11", series: "FAS NG", torqueNm: 65000, maxRPM: 1200, boreDiameterMin: 200, boreDiameterMax: 290 },
-  { model: "FAS NG 12", series: "FAS NG", torqueNm: 100000, maxRPM: 1100, boreDiameterMin: 230, boreDiameterMax: 350 },
-  { model: "FAS NG 14", series: "FAS NG", torqueNm: 150000, maxRPM: 950, boreDiameterMin: 260, boreDiameterMax: 400 },
-  { model: "FAS NG 16", series: "FAS NG", torqueNm: 320000, maxRPM: 890, boreDiameterMin: 290, boreDiameterMax: 450 },
-  { model: "FAS NG 18", series: "FAS NG", torqueNm: 400000, maxRPM: 810, boreDiameterMin: 320, boreDiameterMax: 500 }
+  { model: "FAS NG 2", series: "FAS NG", torqueNm: 250, maxRPM: 5000, boreDiameterMin: 0, boreDiameterMax: 35 },
+  { model: "FAS NG 3", series: "FAS NG", torqueNm: 470, maxRPM: 3500, boreDiameterMin: 0, boreDiameterMax: 45 },
+  { model: "FAS NG 4", series: "FAS NG", torqueNm: 1106, maxRPM: 3500, boreDiameterMin: 0, boreDiameterMax: 60 },
+  { model: "FAS NG 5", series: "FAS NG", torqueNm: 2800, maxRPM: 2500, boreDiameterMin: 0, boreDiameterMax: 75 },
+  { model: "FAS NG 6", series: "FAS NG", torqueNm: 3200, maxRPM: 2500, boreDiameterMin: 0, boreDiameterMax: 85 },
+  { model: "FAS NG 7", series: "FAS NG", torqueNm: 6300, maxRPM: 2200, boreDiameterMin: 0, boreDiameterMax: 95 },
+  { model: "FAS NG 8", series: "FAS NG", torqueNm: 7800, maxRPM: 2000, boreDiameterMin: 0, boreDiameterMax: 110 },
+  { model: "FAS NG 9 A", series: "FAS NG", torqueNm: 13000, maxRPM: 1800, boreDiameterMin: 45, boreDiameterMax: 120 },
+  { model: "FAS NG 9", series: "FAS NG", torqueNm: 20000, maxRPM: 1500, boreDiameterMin: 45, boreDiameterMax: 130 },
+  { model: "FAS NG 10", series: "FAS NG", torqueNm: 45000, maxRPM: 1300, boreDiameterMin: 75, boreDiameterMax: 180 },
+  { model: "FAS NG 11", series: "FAS NG", torqueNm: 65000, maxRPM: 1200, boreDiameterMin: 85, boreDiameterMax: 200 },
+  { model: "FAS NG 12", series: "FAS NG", torqueNm: 100000, maxRPM: 1100, boreDiameterMin: 100, boreDiameterMax: 230 },
+  { model: "FAS NG 14", series: "FAS NG", torqueNm: 150000, maxRPM: 1000, boreDiameterMin: 120, boreDiameterMax: 260 },
+  { model: "FAS NG 16", series: "FAS NG", torqueNm: 320000, maxRPM: 890, boreDiameterMin: 140, boreDiameterMax: 290 },
+  { model: "FAS NG 18", series: "FAS NG", torqueNm: 400000, maxRPM: 810, boreDiameterMin: 160, boreDiameterMax: 320 }
 ];
 
-// FAS NG LP Series - Large Power
+// FAS NG H Series - Heavy Duty (Based on FUNDAL catalog table)
+export const FASNG_H_SERIES: CouplingModel[] = [
+  { model: "FAS NG 7 -H", series: "FAS NG-H", torqueNm: 6300, maxRPM: 2200, boreDiameterMin: 40, boreDiameterMax: 90 },
+  { model: "FAS NG 8 -H", series: "FAS NG-H", torqueNm: 7800, maxRPM: 2000, boreDiameterMin: 40, boreDiameterMax: 100 },
+  { model: "FAS NG 9 A -H", series: "FAS NG-H", torqueNm: 13000, maxRPM: 1800, boreDiameterMin: 50, boreDiameterMax: 120 },
+  { model: "FAS NG 9 -H", series: "FAS NG-H", torqueNm: 20000, maxRPM: 1500, boreDiameterMin: 50, boreDiameterMax: 127 },
+  { model: "FAS NG 10 -H", series: "FAS NG-H", torqueNm: 45000, maxRPM: 1300, boreDiameterMin: 100, boreDiameterMax: 180 },
+  { model: "FAS NG 11 -H", series: "FAS NG-H", torqueNm: 65000, maxRPM: 1200, boreDiameterMin: 100, boreDiameterMax: 200 },
+  { model: "FAS NG 12 -H", series: "FAS NG-H", torqueNm: 100000, maxRPM: 1100, boreDiameterMin: 110, boreDiameterMax: 230 },
+  { model: "FAS NG 14 -H", series: "FAS NG-H", torqueNm: 160000, maxRPM: 1000, boreDiameterMin: 150, boreDiameterMax: 260 },
+  { model: "FAS NG 16 -H", series: "FAS NG-H", torqueNm: 320000, maxRPM: 890, boreDiameterMin: 150, boreDiameterMax: 290 },
+  { model: "FAS NG 18 -H", series: "FAS NG-H", torqueNm: 400000, maxRPM: 810, boreDiameterMin: 180, boreDiameterMax: 330 }
+];
+
+// FAS NG LP Series - Large Power (Based on FUNDAL catalog table)
 export const FASNGLP_SERIES: CouplingModel[] = [
-  { model: "FAS NG 7 LP", series: "FAS NG-LP", torqueNm: 8400, maxRPM: 2200, boreDiameterMin: 90, boreDiameterMax: 145 },
-  { model: "FAS NG 8 LP", series: "FAS NG-LP", torqueNm: 11500, maxRPM: 2000, boreDiameterMin: 100, boreDiameterMax: 155 },
-  { model: "FAS NG 9 LP", series: "FAS NG-LP", torqueNm: 20000, maxRPM: 1800, boreDiameterMin: 120, boreDiameterMax: 190 },
-  { model: "FAS NG 9 LP", series: "FAS NG-LP", torqueNm: 25000, maxRPM: 1500, boreDiameterMin: 130, boreDiameterMax: 195 },
-  { model: "FAS NG 10 LP", series: "FAS NG-LP", torqueNm: 50000, maxRPM: 1300, boreDiameterMin: 180, boreDiameterMax: 290 },
-  { model: "FAS NG 11 LP", series: "FAS NG-LP", torqueNm: 72000, maxRPM: 1200, boreDiameterMin: 200, boreDiameterMax: 300 },
-  { model: "FAS NG 12 LP", series: "FAS NG-LP", torqueNm: 105000, maxRPM: 1100, boreDiameterMin: 230, boreDiameterMax: 350 },
-  { model: "FAS NG 14 LP", series: "FAS NG-LP", torqueNm: 195000, maxRPM: 1000, boreDiameterMin: 260, boreDiameterMax: 400 },
-  { model: "FAS NG 16 LP", series: "FAS NG-LP", torqueNm: 380000, maxRPM: 890, boreDiameterMin: 290, boreDiameterMax: 450 },
-  { model: "FAS NG 18 LP", series: "FAS NG-LP", torqueNm: 450000, maxRPM: 810, boreDiameterMin: 330, boreDiameterMax: 500 },
-  { model: "FAS NG 20 LP", series: "FAS NG-LP", torqueNm: 685000, maxRPM: 780, boreDiameterMin: 360, boreDiameterMax: 550 },
-  { model: "FAS NG 22 LP", series: "FAS NG-LP", torqueNm: 1100000, maxRPM: 750, boreDiameterMin: 420, boreDiameterMax: 600 }
+  { model: "FAS NG 7 LP", series: "FAS NG-LP", torqueNm: 8400, maxRPM: 2200, boreDiameterMin: 40, boreDiameterMax: 90 },
+  { model: "FAS NG 8 LP", series: "FAS NG-LP", torqueNm: 11500, maxRPM: 2000, boreDiameterMin: 40, boreDiameterMax: 100 },
+  { model: "FAS NG 9 A LP", series: "FAS NG-LP", torqueNm: 20000, maxRPM: 1800, boreDiameterMin: 50, boreDiameterMax: 120 },
+  { model: "FAS NG 9 LP", series: "FAS NG-LP", torqueNm: 25000, maxRPM: 1500, boreDiameterMin: 80, boreDiameterMax: 130 },
+  { model: "FAS NG 10 LP", series: "FAS NG-LP", torqueNm: 50000, maxRPM: 1300, boreDiameterMin: 90, boreDiameterMax: 180 },
+  { model: "FAS NG 11 LP", series: "FAS NG-LP", torqueNm: 72000, maxRPM: 1200, boreDiameterMin: 100, boreDiameterMax: 200 },
+  { model: "FAS NG 12 LP", series: "FAS NG-LP", torqueNm: 105000, maxRPM: 1100, boreDiameterMin: 110, boreDiameterMax: 230 },
+  { model: "FAS NG 14 LP", series: "FAS NG-LP", torqueNm: 195000, maxRPM: 1000, boreDiameterMin: 150, boreDiameterMax: 260 },
+  { model: "FAS NG 16 LP", series: "FAS NG-LP", torqueNm: 360000, maxRPM: 890, boreDiameterMin: 150, boreDiameterMax: 290 },
+  { model: "FAS NG 18 LP", series: "FAS NG-LP", torqueNm: 450000, maxRPM: 810, boreDiameterMin: 180, boreDiameterMax: 330 },
+  { model: "FAS NG 20 LP", series: "FAS NG-LP", torqueNm: 685000, maxRPM: 780, boreDiameterMin: 230, boreDiameterMax: 360 },
+  { model: "FAS NG 22 LP", series: "FAS NG-LP", torqueNm: 1100000, maxRPM: 750, boreDiameterMin: 250, boreDiameterMax: 420 }
 ];
 
 // Combine all series for easy searching
@@ -251,6 +266,7 @@ export const ALL_COUPLINGS: CouplingModel[] = [
   ...FAC_SERIES,
   ...FAFUS_SERIES,
   ...FASNG_SERIES,
+  ...FASNG_H_SERIES,
   ...FASNGLP_SERIES
 ];
 
@@ -338,64 +354,66 @@ export function selectCoupling(
   rpm: number = 1500
 ): CouplingModel | null {
   
-  // Determine which series to search based on requirements
-  let seriesToSearch: CouplingModel[] = [];
+  // Helper function to find compatible coupling in a series
+  function findCompatibleInSeries(series: CouplingModel[]): CouplingModel | null {
+    // Find couplings with adequate torque capacity and RPM
+    const torqueCompatibleCouplings = series.filter(coupling => 
+      coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
+    );
+    
+    // Check masa compatibility for each coupling
+    const compatibleCouplings = torqueCompatibleCouplings.filter(coupling => {
+      const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
+      if (masaCheck.isCompatible) {
+        // Add masa info to coupling for later use
+        (coupling as any).recommendedMasaType = masaCheck.masaType;
+        (coupling as any).recommendedMasaCode = masaCheck.masaCode;
+        return true;
+      }
+      return false;
+    });
+    
+    // Return the smallest adequate coupling (most economical)
+    if (compatibleCouplings.length > 0) {
+      return compatibleCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
+    }
+    
+    return null;
+  }
   
+  // Priority order: try FA first, then move up the series hierarchy only if needed
+  
+  // Special cases first (override the normal hierarchy)
   if (needsFusible) {
-    seriesToSearch = FAFUS_SERIES;
-  } else if (needsSpacerDBSE) {
-    seriesToSearch = FAD_SERIES;
-  } else if (requiredTorqueNm > 100000) {
-    // For very high torque, use FAS NG LP series
-    seriesToSearch = FASNGLP_SERIES;
-  } else if (requiredTorqueNm > 20000) {
-    // For high torque, use FAS NG series
-    seriesToSearch = FASNG_SERIES;
-  } else {
-    // Standard FA series for normal applications
-    seriesToSearch = FA_SERIES;
+    return findCompatibleInSeries(FAFUS_SERIES);
+  } 
+  
+  if (needsSpacerDBSE) {
+    return findCompatibleInSeries(FAD_SERIES);
   }
   
-  // Find couplings with adequate torque capacity and RPM
-  const torqueCompatibleCouplings = seriesToSearch.filter(coupling => 
-    coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
-  );
+  // Normal hierarchy: FA -> FAS NG -> FAS NG-H -> FAS NG-LP
   
-  // Check masa compatibility for each coupling
-  const compatibleCouplings = torqueCompatibleCouplings.filter(coupling => {
-    const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
-    if (masaCheck.isCompatible) {
-      // Add masa info to coupling for later use
-      (coupling as any).recommendedMasaType = masaCheck.masaType;
-      (coupling as any).recommendedMasaCode = masaCheck.masaCode;
-      return true;
-    }
-    return false;
-  });
+  // 1. Try FA series first (most economical)
+  let result = findCompatibleInSeries(FA_SERIES);
+  if (result) return result;
   
-  // Return the smallest adequate coupling (most economical)
-  if (compatibleCouplings.length > 0) {
-    return compatibleCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
-  }
+  // 2. Try FAS NG series (if FA can't handle it)
+  result = findCompatibleInSeries(FASNG_SERIES);
+  if (result) return result;
   
-  // If no coupling found in preferred series, search all series
-  const allTorqueCompatible = ALL_COUPLINGS.filter(coupling => 
-    coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
-  );
+  // 3. Try FAS NG-H series (Heavy Duty variant)
+  result = findCompatibleInSeries(FASNG_H_SERIES);
+  if (result) return result;
   
-  const allCompatibleCouplings = allTorqueCompatible.filter(coupling => {
-    const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
-    if (masaCheck.isCompatible) {
-      (coupling as any).recommendedMasaType = masaCheck.masaType;
-      (coupling as any).recommendedMasaCode = masaCheck.masaCode;
-      return true;
-    }
-    return false;
-  });
+  // 4. Try FAS NG-LP series (Large Power for highest torque requirements)
+  result = findCompatibleInSeries(FASNGLP_SERIES);
+  if (result) return result;
   
-  if (allCompatibleCouplings.length > 0) {
-    return allCompatibleCouplings.sort((a, b) => a.torqueNm - b.torqueNm)[0];
-  }
+  // 5. Last resort: try cardan series (FA/C)
+  result = findCompatibleInSeries(FAC_SERIES);
+  if (result) return result;
   
+  // No suitable coupling found
   return null;
 }

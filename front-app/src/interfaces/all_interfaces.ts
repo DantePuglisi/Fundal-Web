@@ -15,7 +15,7 @@ export type FactorService = {
 };
 
 export type EspecificacionesForm = {
-    name_tag_id:string;
+    name_tag_id?:string;
     hp_or_kw:boolean;
     potencia:number;
     velocidad_rpm:string;

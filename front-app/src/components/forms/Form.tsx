@@ -61,7 +61,7 @@ function Form() {
         const newErrors: string[] = [];
         
         // Campos siempre requeridos (campos básicos)
-        if (!form.name_tag_id.trim()) newErrors.push("Nombre/TAG/ID es requerido");
+        // name_tag_id is now optional
         if (form.potencia <= 0) newErrors.push("La potencia debe ser mayor a 0");
         if (!form.velocidad_rpm.trim()) newErrors.push("La velocidad (RPM) es requerida");
         if (!form.eje_conductor.trim()) newErrors.push("El diámetro del eje conductor es requerido");
@@ -191,12 +191,12 @@ function Form() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div className="md:col-span-2">
                                 <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
-                                    Nombre / TAG / ID del equipo
+                                    Nombre / TAG / ID del equipo <span className="text-gray-500 font-normal">(Opcional)</span>
                                 </label>
                                 <input
                                     type="text"
                                     name="name_tag_id"
-                                    value={form.name_tag_id}
+                                    value={form.name_tag_id || ""}
                                     onChange={handleChange}
                                     className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                     placeholder="Ej: Bomba-001 o Motor Principal"
