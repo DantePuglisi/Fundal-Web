@@ -43,6 +43,10 @@ function Form() {
     });
 
     const [errors, setErrors] = useState<string[]>([]);
+    
+    // Service Factor customization state
+    const [useCustomFS, setUseCustomFS] = useState<boolean>(false);
+    const [customServiceFactor, setCustomServiceFactor] = useState<number>(applicationData?.serviceFactor || 1.5);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -79,6 +83,13 @@ function Form() {
             if (!reductor.eje_conducido.trim()) newErrors.push("Diámetro del eje conducido del reductor es requerido");
         }
         
+        // Validate custom service factor if used
+        if (useCustomFS) {
+            if (customServiceFactor < 0.5 || customServiceFactor > 5.0) {
+                newErrors.push("El Factor de Servicio debe estar entre 0.5 y 5.0");
+            }
+        }
+        
         if (newErrors.length > 0) {
             setErrors(newErrors);
             // Scroll to top to show errors
@@ -103,7 +114,7 @@ function Form() {
             reductor: form.reductor ? reductor : undefined,
             applicationId: id ? parseInt(id) : undefined,
             subApplication: applicationData?.subApplication,
-            serviceFactor: applicationData?.serviceFactor
+            serviceFactor: useCustomFS ? customServiceFactor : applicationData?.serviceFactor
         };
         
         // Siempre navegar a los resultados, independientemente del estado del acople fusible
@@ -178,6 +189,94 @@ function Form() {
                             >
                                 Cambiar aplicación
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Service Factor Customization */}
+                {application && applicationData && (
+                    <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8">
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <h3 className="font-bold text-gray-800 text-lg" style={{ fontFamily: 'Poppins' }}>
+                                    Factor de Servicio
+                                </h3>
+                            </div>
+                            
+                            <div className="space-y-3">
+                                <label className="flex items-center gap-3 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="serviceFactorType"
+                                        checked={!useCustomFS}
+                                        onChange={() => setUseCustomFS(false)}
+                                        className="w-4 h-4 text-blue-600"
+                                    />
+                                    <div className="flex-1">
+                                        <span className="font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
+                                            Usar recomendado ({applicationData.serviceFactor.toFixed(2)})
+                                        </span>
+                                        <p className="text-sm text-gray-500">
+                                            Factor recomendado para {applicationData.subApplication}
+                                        </p>
+                                    </div>
+                                </label>
+                                
+                                <label className="flex items-start gap-3 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="serviceFactorType"
+                                        checked={useCustomFS}
+                                        onChange={() => setUseCustomFS(true)}
+                                        className="w-4 h-4 text-blue-600 mt-1"
+                                    />
+                                    <div className="flex-1">
+                                        <span className="font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
+                                            Personalizar
+                                        </span>
+                                        {useCustomFS && (
+                                            <div className="mt-2">
+                                                <input
+                                                    type="number"
+                                                    value={customServiceFactor}
+                                                    onChange={(e) => setCustomServiceFactor(parseFloat(e.target.value) || 1.5)}
+                                                    min="0.5"
+                                                    max="5.0"
+                                                    step="0.1"
+                                                    className="w-24 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                                />
+                                                <span className="ml-2 text-sm text-gray-500">
+                                                    (Entre 0.5 y 5.0)
+                                                </span>
+                                                {customServiceFactor !== applicationData.serviceFactor && (
+                                                    <div className={`mt-2 text-sm ${
+                                                        Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
+                                                            ? 'text-amber-600 bg-amber-50 border border-amber-200' 
+                                                            : 'text-blue-600 bg-blue-50 border border-blue-200'
+                                                    } rounded-lg px-3 py-2`}>
+                                                        {Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
+                                                            ? '⚠️ El FS personalizado difiere significativamente del recomendado' 
+                                                            : '💡 FS personalizado activo'}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div className="mt-3 p-3 bg-white rounded-lg border border-blue-100">
+                                <p className="text-sm text-gray-600">
+                                    <span className="font-medium">Factor de Servicio Seleccionado:</span>{' '}
+                                    <span className="font-bold text-blue-700">
+                                        {(useCustomFS ? customServiceFactor : applicationData.serviceFactor).toFixed(2)}
+                                    </span>
+                                    {useCustomFS && <span className="text-gray-500 ml-1">(Personalizado)</span>}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 )}
