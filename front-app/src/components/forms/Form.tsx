@@ -122,7 +122,7 @@ function Form() {
     };
 
     return (
-        <div className="max-w-5xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4 pb-12">
             <div className="text-center mb-8">
                 <h2 className='text-gray-800 font-bold text-2xl lg:text-3xl mb-3' style={{ fontFamily: 'Poppins' }}>
                     Especificaciones del Equipo
