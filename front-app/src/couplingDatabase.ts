@@ -283,14 +283,21 @@ function checkMasaCompatibility(
   conducidoDiameter: number
 ): { isCompatible: boolean; masaType?: string; masaCode?: string } {
   
-  // For non-FA series, use the existing bore range
-  if (!coupling.series.startsWith('FA') || coupling.series === 'FA/C') {
-    const fits = coupling.boreDiameterMin && coupling.boreDiameterMax &&
-                 conductorDiameter >= coupling.boreDiameterMin && 
-                 conductorDiameter <= coupling.boreDiameterMax &&
-                 conducidoDiameter >= coupling.boreDiameterMin && 
-                 conducidoDiameter <= coupling.boreDiameterMax;
-    return { isCompatible: fits || false };
+  // Series that use MASA logic (only FA standard series and FA variants that use masa)
+  const useMasaLogic = coupling.series === 'FA' || coupling.series === 'FA/D' || 
+                       coupling.series === 'FA/FUS';
+  
+  // All other series (FAS NG, FAS NG-H, FAS NG-LP, FA/C) use bore diameter logic
+  if (!useMasaLogic) {
+    // Check if bore diameter fields exist and both shafts fit within range
+    if (coupling.boreDiameterMin !== undefined && coupling.boreDiameterMax !== undefined) {
+      const fits = conductorDiameter >= coupling.boreDiameterMin && 
+                   conductorDiameter <= coupling.boreDiameterMax &&
+                   conducidoDiameter >= coupling.boreDiameterMin && 
+                   conducidoDiameter <= coupling.boreDiameterMax;
+      return { isCompatible: fits };
+    }
+    return { isCompatible: false };
   }
   
   // For FA series, ONLY check masa ranges (no overall bore diameter)
@@ -395,10 +402,12 @@ export function selectCoupling(
   // Normal hierarchy: FA -> FAS NG -> FAS NG-H -> FAS NG-LP
   
   // 1. Try FA series first (most economical)
+  console.log('Checking FA series...');
   let result = findCompatibleInSeries(FA_SERIES);
   if (result) return result;
   
   // 2. Try FAS NG series (if FA can't handle it)
+  console.log('Checking FAS NG series...');
   result = findCompatibleInSeries(FASNG_SERIES);
   if (result) return result;
   
