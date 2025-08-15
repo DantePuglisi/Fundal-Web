@@ -12,7 +12,8 @@
       "Bash(sed:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

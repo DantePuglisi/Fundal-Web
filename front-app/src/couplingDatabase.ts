@@ -358,7 +358,7 @@ export function selectCoupling(
   function findCompatibleInSeries(series: CouplingModel[]): CouplingModel | null {
     // Find couplings with adequate torque capacity and RPM
     const torqueCompatibleCouplings = series.filter(coupling => 
-      coupling.torqueNm >= requiredTorqueNm && coupling.maxRPM >= rpm
+      coupling.torqueNm >= requiredTorqueNm && rpm <= coupling.maxRPM
     );
     
     // Check masa compatibility for each coupling
