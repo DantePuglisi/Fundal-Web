@@ -51,9 +51,17 @@ function Form() {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const checked = type === "checkbox" || type === "radio" ? (e.target as HTMLInputElement).checked : undefined;
+        
+        let processedValue: string | number | boolean = value;
+        
+        // Handle potencia field conversion
+        if (name === "potencia") {
+            processedValue = value === "" ? 0 : parseFloat(value) || 0;
+        }
+        
         setForm((prev: EspecificacionesForm) => ({
             ...prev,
-            [name]: type === "checkbox" || type === "radio" ? checked : value
+            [name]: type === "checkbox" || type === "radio" ? checked : processedValue
         }));
         // Clear errors when user starts typing
         if (errors.length > 0) {
@@ -316,7 +324,7 @@ function Form() {
                                     <input
                                         type="number"
                                         name="potencia"
-                                        value={form.potencia}
+                                        value={form.potencia === 0 ? '' : form.potencia}
                                         onChange={handleChange}
                                         className="w-24 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-center"
                                         placeholder="0"
