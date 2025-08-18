@@ -13,6 +13,18 @@ export interface AcoplamientoResult {
   calculatedTorqueNm?: number;
   couplingCode?: string;
   masaType?: string;
+  // For dual coupling configuration (reductor)
+  secondCoupling?: {
+    name: string;
+    image: string;
+    factorServicio: number;
+    description: string;
+    ventajas: string[];
+    couplingModel?: CouplingModel;
+    calculatedTorqueNm?: number;
+    couplingCode?: string;
+    masaType?: string;
+  };
 }
 
 export interface FormData {
@@ -31,12 +43,13 @@ export interface FormData {
  * 1. Calculate required torque using FUNDAL formula
  * 2. Find smallest coupling where torque > required, RPM > user RPM, shaft sizes match
  * 3. If fuse is required, only select from fuse-capable models
+ * 4. If reductor is present, calculate two couplings: motor-reductor and reductor-application
  * 
  * @param data - Form data containing all equipment specifications
- * @returns AcoplamientoResult - The recommended coupling with calculated service factor
+ * @returns AcoplamientoResult - The recommended coupling(s) with calculated service factor
  */
 export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
-  const { especificaciones, serviceFactor } = data;
+  const { especificaciones, serviceFactor, reductor } = data;
   
   // Convert power to HP if needed (kW to HP: multiply by 1.341)
   const powerHP = especificaciones.hp_or_kw 
@@ -59,7 +72,12 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   // Required Torque (Nm) = Nominal Torque × FS
   const requiredTorqueNm = nominalTorqueNm * finalServiceFactor;
   
-  // Step 2: Find appropriate coupling
+  // Check if reductor is present
+  if (especificaciones.reductor && reductor) {
+    return calculateDualCouplings(data, powerHP, rpm, nominalTorqueNm, finalServiceFactor, requiredTorqueNm);
+  }
+  
+  // Standard single coupling calculation
   const selectedCoupling = selectCoupling(
     requiredTorqueNm,
     conductorDiameter,
@@ -90,7 +108,7 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   const couplingCode = generateCouplingCode(selectedCoupling, data);
   
   // Determine coupling type and characteristics
-  const couplingDetails = getCouplingDetails(selectedCoupling, especificaciones.acople, especificaciones.distanciador);
+  const couplingDetails = getCouplingDetails(selectedCoupling, especificaciones.acople);
   
   return {
     id: parseInt(selectedCoupling.model.match(/\d+/)?.[0] || '1'),
@@ -102,7 +120,131 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
     couplingModel: selectedCoupling,
     calculatedTorqueNm: Math.round(nominalTorqueNm * 10) / 10, // Show nominal torque (equipment torque)
     couplingCode: couplingCode,
-    masaType: (selectedCoupling as any).recommendedMasaType
+    masaType: (selectedCoupling as { recommendedMasaType?: string }).recommendedMasaType
+  };
+}
+
+/**
+ * Calculates dual couplings for reductor configuration
+ * First coupling: Motor to Reductor (original RPM, original shaft dimensions)
+ * Second coupling: Reductor to Application (reduced RPM, reductor shaft dimensions)
+ */
+function calculateDualCouplings(
+  data: FormData, 
+  _powerHP: number, 
+  rpm: number, 
+  nominalTorqueNm: number, 
+  finalServiceFactor: number, 
+  requiredTorqueNm: number
+): AcoplamientoResult {
+  const { especificaciones, reductor } = data;
+  
+  if (!reductor) {
+    throw new Error("Reductor data is required for dual coupling calculation");
+  }
+  
+  // Parse reductor data
+  const reductionRatio = parseFloat(reductor.relacion_npm) || 1;
+  const reductorOutputShaft = parseFloat(reductor.eje_salida) || 0;
+  const reductorDrivenShaft = parseFloat(reductor.eje_conducido) || 0;
+  const conductorDiameter = parseFloat(especificaciones.eje_conductor) || 0;
+  const conducidoDiameter = parseFloat(especificaciones.eje_conducido) || 0;
+  
+  // First coupling: Motor to Reductor
+  // Uses original motor shaft diameters (motor shaft to reductor input shaft)
+  const firstCoupling = selectCoupling(
+    requiredTorqueNm,
+    conductorDiameter,
+    conducidoDiameter, // Use original driven shaft diameter, not reductor output
+    especificaciones.distanciador,
+    especificaciones.acople,
+    rpm
+  );
+  
+  if (!firstCoupling) {
+    return {
+      id: 0,
+      name: "No se encontró acoplamiento adecuado para Motor-Reductor",
+      image: getImagePath("/Acoples render/FA.png"),
+      factorServicio: finalServiceFactor,
+      description: "No se encontró un acoplamiento que cumpla con los requisitos especificados para la conexión Motor-Reductor.",
+      ventajas: [],
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10
+    };
+  }
+  
+  // Second coupling: Reductor to Application
+  // Calculate reduced RPM and increased torque
+  const reducedRPM = rpm / reductionRatio;
+  const increasedTorqueNm = nominalTorqueNm * reductionRatio;
+  const requiredTorqueSecond = increasedTorqueNm * finalServiceFactor;
+  
+  const secondCoupling = selectCoupling(
+    requiredTorqueSecond,
+    reductorOutputShaft, // Reductor output shaft (eje_salida)
+    reductorDrivenShaft, // Application shaft (eje_conducido del reductor)
+    false, // Second coupling typically doesn't have spacer
+    false, // Second coupling typically doesn't have fuse
+    reducedRPM
+  );
+  
+  if (!secondCoupling) {
+    return {
+      id: 0,
+      name: "No se encontró acoplamiento adecuado para Reductor-Aplicación",
+      image: getImagePath("/Acoples render/FA.png"),
+      factorServicio: finalServiceFactor,
+      description: "No se encontró un acoplamiento que cumpla con los requisitos especificados para la conexión Reductor-Aplicación.",
+      ventajas: [],
+      calculatedTorqueNm: Math.round(requiredTorqueSecond * 10) / 10
+    };
+  }
+  
+  // Calculate service factors for both couplings
+  const firstResultantSF = firstCoupling.torqueNm / nominalTorqueNm;
+  const secondResultantSF = secondCoupling.torqueNm / increasedTorqueNm;
+  
+  // Generate codes for both couplings
+  const firstCouplingCode = generateCouplingCode(firstCoupling, data);
+  const secondCouplingCode = generateCouplingCode(secondCoupling, {
+    ...data,
+    especificaciones: {
+      ...especificaciones,
+      distanciador: false,
+      acople: false
+    }
+  });
+  
+  // Get details for both couplings
+  const firstCouplingDetails = getCouplingDetails(firstCoupling, especificaciones.acople);
+  const secondCouplingDetails = getCouplingDetails(secondCoupling, false);
+  
+  return {
+    id: parseInt(firstCoupling.model.match(/\d+/)?.[0] || '1'),
+    name: `${firstCouplingDetails.name} - ${firstCoupling.model} (Motor-Reductor)`,
+    image: firstCouplingDetails.image,
+    factorServicio: Math.round(firstResultantSF * 100) / 100,
+    description: `Configuración dual: ${firstCouplingDetails.description} + ${secondCouplingDetails.description}`,
+    ventajas: [
+      "Configuración optimizada para sistemas con reductor",
+      "Protección completa del tren de transmisión",
+      ...firstCouplingDetails.ventajas.slice(0, 2)
+    ],
+    couplingModel: firstCoupling,
+    calculatedTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+    couplingCode: firstCouplingCode,
+    masaType: (firstCoupling as { recommendedMasaType?: string }).recommendedMasaType,
+    secondCoupling: {
+      name: `${secondCouplingDetails.name} - ${secondCoupling.model} (Reductor-Aplicación)`,
+      image: secondCouplingDetails.image,
+      factorServicio: Math.round(secondResultantSF * 100) / 100,
+      description: secondCouplingDetails.description,
+      ventajas: secondCouplingDetails.ventajas,
+      couplingModel: secondCoupling,
+      calculatedTorqueNm: Math.round(increasedTorqueNm * 10) / 10,
+      couplingCode: secondCouplingCode,
+      masaType: (secondCoupling as { recommendedMasaType?: string }).recommendedMasaType
+    }
   };
 }
 
@@ -181,7 +323,7 @@ function calculateResultantServiceFactor(data: FormData): number {
 function generateCouplingCode(coupling: CouplingModel, data: FormData): string {
   const { especificaciones, distanciador } = data;
   const baseModel = coupling.model.replace(/\s+/g, ' ');
-  const masaCode = (coupling as any).recommendedMasaCode || '';
+  const masaCode = (coupling as { recommendedMasaCode?: string }).recommendedMasaCode || '';
   const hasFuse = especificaciones.acople;
   
   // For FA series with fuse, format is "FA X / FUS / 1"
@@ -230,7 +372,7 @@ function generateCouplingCode(coupling: CouplingModel, data: FormData): string {
 /**
  * Gets coupling details based on the selected model
  */
-function getCouplingDetails(coupling: CouplingModel, hasFuse: boolean, _hasSpacerr: boolean): {
+function getCouplingDetails(coupling: CouplingModel, hasFuse: boolean): {
   name: string;
   image: string;
   description: string;
