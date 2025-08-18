@@ -429,16 +429,42 @@ function Form() {
                                 {form.reductor && (
                                     <>
                                         <div>
-                                            <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>Relación de Reducción</label>
-                                            <input
-                                                type="text"
-                                                name="relacion"
-                                                value={reductor.relacion_npm}
-                                                onChange={e => setReductor({ ...reductor, relacion_npm: e.target.value })}
-                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                                placeholder="Ej: 10:1"
-                                            />
+                                            <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
+                                                Relación de Reducción
+                                            </label>
+                                            <div className="relative inline-block">
+                                                <input
+                                                    type="text"
+                                                    name="relacion"
+                                                    value={reductor.relacion_npm}
+                                                    onChange={e => {
+                                                        // Normalize decimal separators (allow both comma and dot)
+                                                        let value = e.target.value;
+                                                        // Allow only numbers, commas, and dots
+                                                        value = value.replace(/[^0-9,\.]/g, '');
+                                                        // Replace comma with dot for internal consistency
+                                                        const normalizedValue = value.replace(',', '.');
+                                                        setReductor({ ...reductor, relacion_npm: normalizedValue });
+                                                    }}
+                                                    className="w-24 border border-gray-300 rounded-lg px-3 py-3 pr-8 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-center"
+                                                    placeholder="25.17"
+                                                />
+                                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none">
+                                                    :1
+                                                </div>
+                                            </div>
+                                            {reductor.relacion_npm && (
+                                                <p className="text-xs text-teal-600 mt-1" style={{ fontFamily: 'Poppins' }}>
+                                                    Relación: {reductor.relacion_npm.replace('.', ',')}:1
+                                                </p>
+                                            )}
                                         </div>
+                                    </>
+                                )}
+                            </div>
+                            {form.reductor && (
+                                <div className="mt-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>Ø Eje Salida del Reductor (mm)</label>
                                             <input
@@ -450,20 +476,18 @@ function Form() {
                                                 placeholder="Diámetro en mm"
                                             />
                                         </div>
-                                    </>
-                                )}
-                            </div>
-                            {form.reductor && (
-                                <div className="mt-4">
-                                    <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>Ø Eje Conducido del Reductor (mm)</label>
-                                    <input
-                                        type="text"
-                                        name="ejeConducido"
-                                        value={reductor.eje_conducido}
-                                        onChange={e => setReductor({ ...reductor, eje_conducido: e.target.value })}
-                                        className="w-full md:w-1/3 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
-                                        placeholder="Diámetro en mm"
-                                    />
+                                        <div>
+                                            <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>Ø Eje Conducido del Reductor (mm)</label>
+                                            <input
+                                                type="text"
+                                                name="ejeConducido"
+                                                value={reductor.eje_conducido}
+                                                onChange={e => setReductor({ ...reductor, eje_conducido: e.target.value })}
+                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                placeholder="Diámetro en mm"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>

@@ -144,7 +144,9 @@ function calculateDualCouplings(
   }
   
   // Parse reductor data
-  const reductionRatio = parseFloat(reductor.relacion_npm) || 1;
+  // Handle reduction ratio - normalize decimal separator and parse
+  const normalizedRatio = reductor.relacion_npm.replace(',', '.');
+  const reductionRatio = parseFloat(normalizedRatio) || 1;
   const reductorOutputShaft = parseFloat(reductor.eje_salida) || 0;
   const reductorDrivenShaft = parseFloat(reductor.eje_conducido) || 0;
   const conductorDiameter = parseFloat(especificaciones.eje_conductor) || 0;
