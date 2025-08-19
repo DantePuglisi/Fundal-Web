@@ -254,7 +254,7 @@ function Form() {
                                                     min="0.5"
                                                     max="5.0"
                                                     step="0.1"
-                                                    className="w-24 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                                                    className="w-24 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                                                 />
                                                 <span className="ml-2 text-sm text-gray-500">
                                                     (Entre 0.5 y 5.0)
@@ -305,7 +305,7 @@ function Form() {
                                     name="name_tag_id"
                                     value={form.name_tag_id || ""}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                     placeholder="Ej: Bomba-001 o Motor Principal"
                                 />
                             </div>
@@ -326,7 +326,7 @@ function Form() {
                                         name="potencia"
                                         value={form.potencia === 0 ? '' : form.potencia}
                                         onChange={handleChange}
-                                        className="w-24 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-center"
+                                        className="w-24 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-center"
                                         placeholder="0"
                                         min="0"
                                         step="0.1"
@@ -348,7 +348,7 @@ function Form() {
                                     name="velocidad_rpm"
                                     value={form.velocidad_rpm}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                     placeholder="Ej: 1800"
                                 />
                             </div>
@@ -359,7 +359,7 @@ function Form() {
                                     name="eje_conductor"
                                     value={form.eje_conductor}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                     placeholder="Ej: 45"
                                 />
                             </div>
@@ -370,7 +370,7 @@ function Form() {
                                     name="eje_conducido"
                                     value={form.eje_conducido}
                                     onChange={handleChange}
-                                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                     placeholder="Ej: 50"
                                 />
                             </div>
@@ -404,7 +404,7 @@ function Form() {
                                             name="dbse"
                                             value={distanciador.dbse}
                                             onChange={e => setDistanciador({ ...distanciador, dbse: e.target.value })}
-                                            className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                            className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                             placeholder="Distancia entre ejes"
                                         />
                                     </div>
@@ -432,7 +432,10 @@ function Form() {
                                             <label className="block mb-2 font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
                                                 Relación de Reducción
                                             </label>
-                                            <div className="relative inline-block">
+                                            <div className="inline-flex items-center bg-gray-50 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-teal-500 focus-within:border-transparent overflow-hidden">
+                                                <div className="px-3 py-3 bg-gray-100 text-gray-600 font-medium text-center min-w-[2.5rem] border-r border-gray-300">
+                                                    1:
+                                                </div>
                                                 <input
                                                     type="text"
                                                     name="relacion"
@@ -446,16 +449,13 @@ function Form() {
                                                         const normalizedValue = value.replace(',', '.');
                                                         setReductor({ ...reductor, relacion_npm: normalizedValue });
                                                     }}
-                                                    className="w-24 border border-gray-300 rounded-lg px-3 py-3 pr-8 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none text-center"
+                                                    className="w-20 px-3 py-3 bg-white border-0 focus:ring-0 focus:outline-none text-center"
                                                     placeholder="25.17"
                                                 />
-                                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium pointer-events-none">
-                                                    :1
-                                                </div>
                                             </div>
                                             {reductor.relacion_npm && (
                                                 <p className="text-xs text-teal-600 mt-1" style={{ fontFamily: 'Poppins' }}>
-                                                    Relación: {reductor.relacion_npm.replace('.', ',')}:1
+                                                    Relación: 1:{reductor.relacion_npm.replace('.', ',')}
                                                 </p>
                                             )}
                                         </div>
@@ -472,7 +472,7 @@ function Form() {
                                                 name="ejeSalida"
                                                 value={reductor.eje_salida}
                                                 onChange={e => setReductor({ ...reductor, eje_salida: e.target.value })}
-                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                                 placeholder="Diámetro en mm"
                                             />
                                         </div>
@@ -483,7 +483,7 @@ function Form() {
                                                 name="ejeConducido"
                                                 value={reductor.eje_conducido}
                                                 onChange={e => setReductor({ ...reductor, eje_conducido: e.target.value })}
-                                                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
+                                                className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none"
                                                 placeholder="Diámetro en mm"
                                             />
                                         </div>
