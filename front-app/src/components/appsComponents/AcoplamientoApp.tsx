@@ -6,14 +6,6 @@ import { CouplingOptionsTable } from '../CouplingOptionsTable';
 // import html2canvas from 'html2canvas'; // Removed - now using PDF generator
 import { generateAndDownloadReport, type ReportData } from '../../utils/pdfReportGenerator';
 import { getApplicationById } from '../../serviceFactorData';
-const icons = [
-  { icon: getImagePath("/icons/Alta performance.png"), label: "Alta performance" },
-  { icon: getImagePath("/icons/Vida util prolongada.png"), label: "Vida útil prolongada" },
-  { icon: getImagePath("/icons/Estabilidas dinamica.png"), label: "Estabilidad dinámica" },
-  { icon: getImagePath("/icons/Eficiencia.png"), label: "Eficiencia" },
-  { icon: getImagePath("/icons/Respuesta elastica.png"), label: "Excelente respuesta elástica" },
-  { icon: getImagePath("/icons/Mantenimiento.png"), label: "Mantenimiento fácil y rápido" },
-];
 
 function AcoplamientoApp() {
   const [resultado, setResultado] = useState<AcoplamientoResult | null>(null);
@@ -117,27 +109,43 @@ function AcoplamientoApp() {
           {resultado.secondCoupling ? (
             // Dual coupling - show both tables
             <div className="space-y-8">
-              {/* First Coupling Options */}
-              <CouplingOptionsTable
-                options={resultado.allOptions}
-                title="Opciones - Acoplamiento Motor-Reductor"
-                nominalTorque={resultado.nominalTorqueNm}
-                requiredTorque={resultado.requiredTorqueNm}
-                rpm={resultado.rpm}
-                conductorDiameter={resultado.conductorDiameter}
-                conducidoDiameter={resultado.conducidoDiameter}
-              />
+              {/* High Speed Coupling - Motor to Reducer */}
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-2 text-center" style={{ fontFamily: 'Poppins' }}>
+                  ACOPLAMIENTO DE ALTA VELOCIDAD
+                </h3>
+                <p className="text-gray-600 text-center text-sm mb-4" style={{ fontFamily: 'Poppins' }}>
+                  Motor → Reductor | Alta RPM - Bajo Torque
+                </p>
+                <CouplingOptionsTable
+                  options={resultado.allOptions}
+                  title="Acoplamiento Motor-Reductor (Alta Velocidad)"
+                  nominalTorque={resultado.nominalTorqueNm}
+                  requiredTorque={resultado.requiredTorqueNm}
+                  rpm={resultado.rpm}
+                  conductorDiameter={resultado.conductorDiameter}
+                  conducidoDiameter={resultado.conducidoDiameter}
+                />
+              </div>
               
-              {/* Second Coupling Options */}
-              <CouplingOptionsTable
-                options={resultado.secondCoupling.allOptions}
-                title="Opciones - Acoplamiento Reductor-Aplicación"
-                nominalTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.nominalTorqueNm}
-                requiredTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.requiredTorqueNm}
-                rpm={formData?.reductor?.relacion_npm ? resultado.rpm / parseFloat(formData.reductor.relacion_npm) : resultado.rpm}
-                conductorDiameter={formData?.reductor?.eje_salida ? parseFloat(formData.reductor.eje_salida) : resultado.conductorDiameter}
-                conducidoDiameter={formData?.reductor?.eje_conducido ? parseFloat(formData.reductor.eje_conducido) : resultado.conducidoDiameter}
-              />
+              {/* Low Speed Coupling - Reducer to Application */}
+              <div className="bg-gray-100 border border-gray-300 rounded-xl p-4">
+                <h3 className="text-xl font-bold text-gray-800 mb-2 text-center" style={{ fontFamily: 'Poppins' }}>
+                  ACOPLAMIENTO DE BAJA VELOCIDAD
+                </h3>
+                <p className="text-gray-600 text-center text-sm mb-4" style={{ fontFamily: 'Poppins' }}>
+                  Reductor → Aplicación | Baja RPM - Alto Torque
+                </p>
+                <CouplingOptionsTable
+                  options={resultado.secondCoupling.allOptions}
+                  title="Acoplamiento Reductor-Aplicación (Baja Velocidad)"
+                  nominalTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.nominalTorqueNm}
+                  requiredTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.requiredTorqueNm}
+                  rpm={formData?.reductor?.relacion_npm ? resultado.rpm / parseFloat(formData.reductor.relacion_npm) : resultado.rpm}
+                  conductorDiameter={formData?.reductor?.eje_salida ? parseFloat(formData.reductor.eje_salida) : resultado.conductorDiameter}
+                  conducidoDiameter={formData?.reductor?.eje_conducido ? parseFloat(formData.reductor.eje_conducido) : resultado.conducidoDiameter}
+                />
+              </div>
             </div>
           ) : (
             // Single coupling - show one table
@@ -156,30 +164,82 @@ function AcoplamientoApp() {
         {/* Equipment Details */}
         <div className="bg-white rounded-xl shadow-lg border p-6 mb-8">
           <h3 className="font-bold text-lg text-gray-800 mb-6" style={{ fontFamily: 'Poppins' }}>Especificaciones del Equipo</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { label: "Equipo", value: formData?.especificaciones.name_tag_id || 'N/A' },
-              { label: "Aplicación", value: formData?.subApplication || 'N/A' },
-              { label: "Potencia", value: `${formData?.especificaciones.potencia} ${formData?.especificaciones.hp_or_kw ? 'kW' : 'HP'}` },
-              { label: "Velocidad", value: `${formData?.especificaciones.velocidad_rpm || 'N/A'} RPM` },
-              { label: "Ø Conductor", value: `${formData?.especificaciones.eje_conductor || 'N/A'} mm` },
-              { label: "Ø Conducido", value: `${formData?.especificaciones.eje_conducido || 'N/A'} mm` },
-              { label: "Distanciador", value: formData?.especificaciones.distanciador ? (formData?.distanciador?.dbse ? `${formData.distanciador.dbse} mm` : 'SÍ') : 'NO' },
-              ...(formData?.especificaciones.reductor ? [
-                { label: "Reductor", value: 'SÍ' },
-                ...(formData?.reductor?.relacion_npm ? [{ label: "Relación", value: formData.reductor.relacion_npm }] : []),
-                ...(formData?.reductor?.eje_salida ? [{ label: "Ø Eje Salida", value: `${formData.reductor.eje_salida} mm` }] : []),
-                ...(formData?.reductor?.eje_conducido ? [{ label: "Ø Eje Conducido", value: `${formData.reductor.eje_conducido} mm` }] : []),
-              ] : [
-                { label: "Reductor", value: 'NO' }
-              ]),
-              { label: "Sistema Fusible", value: formData?.especificaciones.acople ? 'SÍ' : 'NO' },
-            ].map((item, index) => (
-              <div key={index} className="p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-700 text-sm block mb-1" style={{ fontFamily: 'Poppins' }}>{item.label}</span>
-                <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>{item.value}</span>
+          
+          {/* Basic Equipment Data */}
+          <div className="mb-6">
+            <h4 className="font-semibold text-gray-700 text-sm mb-3" style={{ fontFamily: 'Poppins' }}>Datos Básicos</h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { label: "Equipo", value: formData?.especificaciones.name_tag_id || 'N/A' },
+                { label: "Aplicación", value: formData?.subApplication || 'N/A' },
+                { label: "Potencia", value: `${formData?.especificaciones.potencia} ${formData?.especificaciones.hp_or_kw ? 'kW' : 'HP'}` },
+                { label: "Velocidad", value: `${formData?.especificaciones.velocidad_rpm || 'N/A'} RPM` },
+                { label: "Ø Conductor", value: `${formData?.especificaciones.eje_conductor || 'N/A'} mm` },
+                { label: "Ø Conducido", value: `${formData?.especificaciones.eje_conducido || 'N/A'} mm` },
+              ].map((item, index) => (
+                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700 text-sm block mb-1" style={{ fontFamily: 'Poppins' }}>{item.label}</span>
+                  <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Reducer Section - Only show dedicated section if enabled */}
+          {formData?.especificaciones.reductor && (
+            <div className="mb-6 bg-gray-100 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-700 text-sm mb-3" style={{ fontFamily: 'Poppins' }}>Configuración del Reductor</h4>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { label: "Reductor", value: 'SÍ' },
+                  ...(formData?.reductor?.relacion_npm ? [{ label: "Relación", value: formData.reductor.relacion_npm }] : []),
+                  ...(formData?.reductor?.eje_salida ? [{ label: "Ø Eje Salida", value: `${formData.reductor.eje_salida} mm` }] : []),
+                  ...(formData?.reductor?.eje_conducido ? [{ label: "Ø Eje Conducido", value: `${formData.reductor.eje_conducido} mm` }] : []),
+                ].map((item, index) => (
+                  <div key={index} className="p-3 bg-white rounded-lg border border-gray-200">
+                    <span className="font-medium text-gray-700 text-sm block mb-1" style={{ fontFamily: 'Poppins' }}>{item.label}</span>
+                    <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>{item.value}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+          )}
+
+          {/* Distanciador Section - Only show dedicated section if enabled */}
+          {formData?.especificaciones.distanciador && (
+            <div className="mb-6 bg-gray-100 rounded-lg p-4">
+              <h4 className="font-semibold text-gray-700 text-sm mb-3" style={{ fontFamily: 'Poppins' }}>Configuración del Distanciador</h4>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  { label: "Distanciador", value: 'SÍ' },
+                  ...(formData?.distanciador?.dbse ? [{ label: "DBSE", value: `${formData.distanciador.dbse} mm` }] : []),
+                ].map((item, index) => (
+                  <div key={index} className="p-3 bg-white rounded-lg border border-gray-200">
+                    <span className="font-medium text-gray-700 text-sm block mb-1" style={{ fontFamily: 'Poppins' }}>{item.label}</span>
+                    <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Additional Options */}
+          <div>
+            <h4 className="font-semibold text-gray-700 text-sm mb-3" style={{ fontFamily: 'Poppins' }}>Opciones Adicionales</h4>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                // Show Reductor = NO only if it's disabled
+                ...(!formData?.especificaciones.reductor ? [{ label: "Reductor", value: 'NO' }] : []),
+                // Show Distanciador = NO only if it's disabled  
+                ...(!formData?.especificaciones.distanciador ? [{ label: "Distanciador", value: 'NO' }] : []),
+                { label: "Sistema Fusible", value: formData?.especificaciones.acople ? 'SÍ' : 'NO' },
+              ].map((item, index) => (
+                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700 text-sm block mb-1" style={{ fontFamily: 'Poppins' }}>{item.label}</span>
+                  <span className="font-semibold text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>{item.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
           
           <button 
@@ -191,110 +251,6 @@ function AcoplamientoApp() {
           </button>
         </div>
         
-        
-        {/* Advantages Section */}
-        <div className="bg-gradient-to-br from-teal-50 to-white rounded-xl shadow-lg border border-teal-100 p-8 mb-8">
-          <div className="text-center mb-10">
-            <h3 className="text-2xl font-bold text-gray-800 mb-2" style={{ fontFamily: 'Poppins' }}>
-              {resultado.secondCoupling ? 'Ventajas de la Configuración Dual' : 'Ventajas del Acoplamiento Seleccionado'}
-            </h3>
-            <div className="w-24 h-1 bg-teal-500 mx-auto rounded-full"></div>
-          </div>
-          
-          {resultado.secondCoupling ? (
-            // Dual coupling advantages
-            <div className="space-y-8">
-              {/* Combined advantages for the system */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {resultado.ventajas.map((ventaja, i) => (
-                  <div key={i} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-sm">
-                    <div className="flex-shrink-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-2.5 shadow-sm">
-                        <img 
-                          src={icons[i % icons.length]?.icon || getImagePath("/icons/Alta performance.png")} 
-                          alt="advantage" 
-                          className="w-full h-full object-contain filter brightness-0 invert" 
-                        />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-gray-700 text-base leading-relaxed" style={{ fontFamily: 'Poppins', lineHeight: '1.6' }}>
-                        {ventaja}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              {/* Individual coupling advantages */}
-              <div className="grid md:grid-cols-2 gap-6 mt-8">
-                {/* First coupling advantages */}
-                <div className="bg-teal-50 rounded-lg p-6 border border-teal-200">
-                  <h4 className="font-bold text-teal-800 mb-4" style={{ fontFamily: 'Poppins' }}>
-                    Acoplamiento Motor-Reductor
-                  </h4>
-                  <ul className="space-y-2">
-                    <li className="text-sm text-teal-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Transmisión directa de potencia nominal</span>
-                    </li>
-                    <li className="text-sm text-teal-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Protección contra sobrecargas si incluye fusible</span>
-                    </li>
-                    <li className="text-sm text-teal-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Compensación de desalineamientos menores</span>
-                    </li>
-                  </ul>
-                </div>
-                
-                {/* Second coupling advantages */}
-                <div className="bg-orange-50 rounded-lg p-6 border border-orange-200">
-                  <h4 className="font-bold text-orange-800 mb-4" style={{ fontFamily: 'Poppins' }}>
-                    Acoplamiento Reductor-Aplicación
-                  </h4>
-                  <ul className="space-y-2">
-                    <li className="text-sm text-orange-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Manejo de alto torque post-reducción</span>
-                    </li>
-                    <li className="text-sm text-orange-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Velocidad reducida para mayor control</span>
-                    </li>
-                    <li className="text-sm text-orange-700 flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-2 flex-shrink-0"></span>
-                      <span>Protección adicional del equipamiento final</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Single coupling advantages
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {resultado.ventajas.map((ventaja, i) => (
-                <div key={i} className="flex items-start gap-4 bg-white rounded-lg p-5 shadow-sm">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg p-2.5 shadow-sm">
-                      <img 
-                        src={icons[i % icons.length]?.icon || getImagePath("/icons/Alta performance.png")} 
-                        alt="advantage" 
-                        className="w-full h-full object-contain filter brightness-0 invert" 
-                      />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-gray-700 text-base leading-relaxed" style={{ fontFamily: 'Poppins', lineHeight: '1.6' }}>
-                      {ventaja}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
         
         {/* Action Buttons */}
         <div className="bg-white rounded-xl shadow-lg border p-8 mb-8">

@@ -73,7 +73,6 @@ export function CouplingOptionsTable({
         }`}>
           {options.map((option, idx) => {
             const isSelected = option === selectedOption;
-            const isRecommended = idx === 0; // First option is the recommended one
             
             return (
               <div 
@@ -82,18 +81,10 @@ export function CouplingOptionsTable({
                   relative bg-white rounded-lg border-2 p-4
                   ${isSelected 
                     ? 'border-teal-500 bg-teal-50' 
-                    : isRecommended
-                    ? 'border-teal-300 bg-teal-25'
                     : 'border-gray-200'
                   }
                 `}
               >
-                {/* Recommendation Badge */}
-                {isRecommended && (
-                  <div className="absolute -top-2 -right-2 bg-teal-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    Recomendado
-                  </div>
-                )}
 
                 {/* Top Section - Split horizontally */}
                 <div className="flex gap-6 mb-4">
