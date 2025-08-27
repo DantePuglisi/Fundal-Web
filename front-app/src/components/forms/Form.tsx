@@ -161,7 +161,7 @@ function Form() {
                             <button
                                 type="button"
                                 onClick={() => setErrors([])}
-                                className="text-red-400 hover:text-red-600 ml-3"
+                                className="text-red-400 hover:text-red-600 ml-3 cursor-pointer"
                             >
                                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -192,7 +192,7 @@ function Form() {
                             <button
                                 type="button"
                                 onClick={() => navigate('/')}
-                                className="text-teal-600 hover:text-teal-700 font-medium text-sm underline"
+                                className="text-teal-600 hover:text-teal-700 font-medium text-sm underline cursor-pointer"
                                 style={{ fontFamily: 'Poppins' }}
                             >
                                 Cambiar aplicación
@@ -581,7 +581,7 @@ function Form() {
                         <div className="flex flex-col sm:flex-row justify-between gap-4">
                             <button
                                 type="button"
-                                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+                                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 cursor-pointer"
                                 onClick={() => navigate('/')}
                                 style={{ fontFamily: 'Poppins' }}
                             >
@@ -589,7 +589,7 @@ function Form() {
                             </button>
                             <button
                                 type="submit"
-                                className="bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200"
+                                className="bg-teal-700 hover:bg-teal-800 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-200 cursor-pointer"
                                 style={{ fontFamily: 'Poppins' }}
                             >
                                 Calcular Acoplamiento →

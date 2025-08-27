@@ -1,5 +1,35 @@
-import { useState } from 'react';
+// import React from 'react'; // Not needed for modern React
 import type { CouplingOption } from '../couplingDatabase';
+import { getImagePath } from '../utils/imagePaths';
+
+// Function to get coupling image based on series (handles both display names and database names)
+function getCouplingImage(series: string): string {
+  switch (series) {
+    case 'FA':
+    case 'FA Estándar':
+      return getImagePath("/Acoples render/FA.png");
+    case 'FA/D':
+    case 'FA con Distanciador':
+      return getImagePath("/Acoples render/FA-D.png");
+    case 'FA/C':
+    case 'FA con Cardán':
+      return getImagePath("/Acoples render/FA-C.png");
+    case 'FA/FUS':
+      return getImagePath("/Acoples render/FA-FUS.png");
+    case 'FAS NG-H':
+    case 'FAS NG Heavy Duty':
+      return getImagePath("/Acoples render/FAS-NG-H.png");
+    case 'FAS NG':
+      return getImagePath("/Acoples render/FAS-NG.png");
+    case 'FAS NG-LP/FUS':
+      return getImagePath("/Acoples render/FAS-NG-LP-FUS.png");
+    case 'FAS NG-LP':
+    case 'FAS NG Large Power':
+      return getImagePath("/Acoples render/FAS-NG-LP.png");
+    default:
+      return getImagePath("/Acoples render/FA.png");
+  }
+}
 
 interface CouplingOptionsTableProps {
   options: CouplingOption[];
@@ -15,33 +45,9 @@ interface CouplingOptionsTableProps {
 
 export function CouplingOptionsTable({ 
   options, 
-  title, 
-  nominalTorque, 
-  requiredTorque, 
-  rpm,
-  conductorDiameter,
-  conducidoDiameter,
   onSelectOption,
   selectedOption
 }: CouplingOptionsTableProps) {
-  const [expandedSeries, setExpandedSeries] = useState<string[]>([]);
-
-  // Group options by series
-  const groupedOptions = options.reduce((acc, option) => {
-    if (!acc[option.series]) {
-      acc[option.series] = [];
-    }
-    acc[option.series].push(option);
-    return acc;
-  }, {} as Record<string, CouplingOption[]>);
-
-  const toggleSeries = (series: string) => {
-    setExpandedSeries(prev => 
-      prev.includes(series) 
-        ? prev.filter(s => s !== series)
-        : [...prev, series]
-    );
-  };
 
   if (options.length === 0) {
     return (
@@ -53,189 +59,132 @@ export function CouplingOptionsTable({
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white p-4">
-        <h3 className="text-lg font-bold" style={{ fontFamily: 'Poppins' }}>
-          {title}
-        </h3>
-        <div className="mt-2 text-sm opacity-90 grid grid-cols-2 md:grid-cols-3 gap-2">
-          <div>
-            <span className="font-medium">Torque Nominal:</span> {nominalTorque} Nm
-          </div>
-          <div>
-            <span className="font-medium">Torque Requerido:</span> {requiredTorque} Nm
-          </div>
-          <div>
-            <span className="font-medium">RPM:</span> {rpm}
-          </div>
-          <div>
-            <span className="font-medium">Ø Conductor:</span> {conductorDiameter} mm
-          </div>
-          <div>
-            <span className="font-medium">Ø Conducido:</span> {conducidoDiameter} mm
-          </div>
-        </div>
-      </div>
 
-      {/* Options by Series */}
-      <div className="divide-y divide-gray-200">
-        {Object.entries(groupedOptions).map(([series, seriesOptions]) => {
-          const isExpanded = expandedSeries.includes(series) || seriesOptions.length === 1;
-          const hasRecommended = seriesOptions.some(opt => opt === selectedOption);
-          
-          return (
-            <div key={series} className="border-l-4 border-teal-500">
-              {/* Series Header */}
+      {/* Visual Coupling Cards Grid */}
+      <div className="p-6">
+        <div className={`grid gap-6 ${
+          options.length === 1 ? 'grid-cols-1 max-w-md mx-auto' :
+          options.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+          options.length === 3 ? 'grid-cols-1 md:grid-cols-3' :
+          options.length === 4 ? 'grid-cols-1 md:grid-cols-2' :
+          options.length === 5 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
+          options.length === 6 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' :
+          'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+        }`}>
+          {options.map((option, idx) => {
+            const isSelected = option === selectedOption;
+            const isRecommended = idx === 0; // First option is the recommended one
+            
+            return (
               <div 
-                className={`p-4 bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer ${hasRecommended ? 'bg-teal-50 hover:bg-teal-100' : ''}`}
-                onClick={() => toggleSeries(series)}
+                key={`${option.model.model}-${idx}`}
+                className={`
+                  relative bg-white rounded-lg border-2 p-4
+                  ${isSelected 
+                    ? 'border-teal-500 bg-teal-50' 
+                    : isRecommended
+                    ? 'border-teal-300 bg-teal-25'
+                    : 'border-gray-200'
+                  }
+                `}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <svg 
-                      className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                    <h4 className="font-semibold text-gray-800" style={{ fontFamily: 'Poppins' }}>
-                      {series}
+                {/* Recommendation Badge */}
+                {isRecommended && (
+                  <div className="absolute -top-2 -right-2 bg-teal-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    Recomendado
+                  </div>
+                )}
+
+                {/* Top Section - Split horizontally */}
+                <div className="flex gap-6 mb-4">
+                  {/* Left side - Larger square coupling image */}
+                  <div className="flex-shrink-0">
+                    <div className="bg-gray-50 rounded-lg p-3 w-32 h-32 flex items-center justify-center">
+                      <img 
+                        src={getCouplingImage(option.series)} 
+                        alt={`${option.series} ${option.model.model}`}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right side - Centered family name, model and service factor */}
+                  <div className="flex-1 flex flex-col justify-center items-center text-center">
+                    <h4 className="font-bold text-gray-900 text-sm mb-1" style={{ fontFamily: 'Poppins' }}>
+                      {option.series}
                     </h4>
-                    {hasRecommended && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
-                        Recomendado
+                    <p className="text-lg font-bold text-teal-700 mb-2">
+                      {option.couplingCode || option.model.model}
+                    </p>
+                    <div>
+                      <p className="text-xs text-gray-500 font-medium mb-1">Factor de Servicio Resultante</p>
+                      <span className={`
+                        inline-flex items-center px-3 py-1 rounded-full font-bold text-sm
+                        ${option.factorServicioResultante >= 1.5 ? 'bg-green-100 text-green-800' : 
+                          option.factorServicioResultante >= 1.0 ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-red-100 text-red-800'}
+                      `}>
+                        {option.factorServicioResultante.toFixed(2)}
                       </span>
-                    )}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    {seriesOptions.length} {seriesOptions.length === 1 ? 'opción' : 'opciones'}
+                </div>
+
+                {/* Technical Specs */}
+                <div className="space-y-3">
+
+                  {/* Technical Data Grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-gray-50 rounded p-2 text-center">
+                      <p className="text-gray-500 font-medium">Torque Máx</p>
+                      <p className="font-bold text-gray-800">
+                        {(option.maxTorqueNm / 1000).toFixed(1)}k Nm
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded p-2 text-center">
+                      <p className="text-gray-500 font-medium">RPM Máx</p>
+                      <p className="font-bold text-gray-800">
+                        {option.maxRPM.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded p-2 text-center">
+                      <p className="text-gray-500 font-medium">Ø Min</p>
+                      <p className="font-bold text-gray-800">
+                        {option.minShaftDiameter} mm
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded p-2 text-center">
+                      <p className="text-gray-500 font-medium">Ø Máx</p>
+                      <p className="font-bold text-gray-800">
+                        {option.maxShaftDiameter} mm
+                      </p>
+                    </div>
                   </div>
+
+
+                  {/* Masa Info */}
+                  {option.masaType && (
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 font-medium">Masa</p>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {option.masaType}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Selection Button */}
+                  {onSelectOption && !isSelected && (
+                    <button
+                      onClick={() => onSelectOption(option)}
+                      className="w-full mt-4 px-3 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 transition-colors cursor-pointer"
+                    >
+                      Seleccionar
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Series Options */}
-              {isExpanded && (
-                <div className="bg-white">
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Modelo
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            FS Resultante
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Torque Máx
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            RPM Máx
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Ø Min-Máx
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Código
-                          </th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Acción
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {seriesOptions.map((option, idx) => {
-                          const isSelected = option === selectedOption;
-                          const meetsRequirements = option.factorServicioResultante >= 1.0;
-                          
-                          return (
-                            <tr 
-                              key={`${option.model.model}-${idx}`}
-                              className={`
-                                ${isSelected ? 'bg-teal-50' : 'hover:bg-gray-50'}
-                                ${!meetsRequirements ? 'opacity-60' : ''}
-                                transition-colors
-                              `}
-                            >
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                <div className="flex items-center gap-2">
-                                  {option.model.model}
-                                  {isSelected && (
-                                    <svg className="w-4 h-4 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-4 py-3 text-sm text-center">
-                                <span className={`
-                                  inline-flex items-center px-2 py-1 rounded-md font-semibold
-                                  ${option.factorServicioResultante >= 1.5 ? 'bg-green-100 text-green-800' : 
-                                    option.factorServicioResultante >= 1.0 ? 'bg-yellow-100 text-yellow-800' : 
-                                    'bg-red-100 text-red-800'}
-                                `}>
-                                  {option.factorServicioResultante.toFixed(2)}
-                                </span>
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 text-center">
-                                {option.maxTorqueNm.toLocaleString()} Nm
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 text-center">
-                                {option.maxRPM.toLocaleString()}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-gray-600 text-center">
-                                {option.minShaftDiameter}-{option.maxShaftDiameter} mm
-                              </td>
-                              <td className="px-4 py-3 text-sm font-mono text-gray-700 text-center">
-                                {option.couplingCode}
-                              </td>
-                              <td className="px-4 py-3 text-sm text-center">
-                                {onSelectOption && (
-                                  <button
-                                    onClick={() => onSelectOption(option)}
-                                    className={`
-                                      px-3 py-1 rounded-md text-xs font-medium transition-colors
-                                      ${isSelected 
-                                        ? 'bg-teal-600 text-white cursor-default' 
-                                        : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                                      }
-                                    `}
-                                    disabled={isSelected}
-                                  >
-                                    {isSelected ? 'Seleccionado' : 'Seleccionar'}
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Legend */}
-      <div className="bg-gray-50 px-4 py-3 border-t border-gray-200">
-        <div className="flex flex-wrap gap-4 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-green-100 rounded"></div>
-            <span className="text-gray-600">FS &ge; 1.5 (Óptimo)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-yellow-100 rounded"></div>
-            <span className="text-gray-600">1.0 &le; FS &lt; 1.5 (Aceptable)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-red-100 rounded"></div>
-            <span className="text-gray-600">FS &lt; 1.0 (No recomendado)</span>
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>

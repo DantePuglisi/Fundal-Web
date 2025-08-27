@@ -9,8 +9,8 @@ function App() {
   return (
       <ErrorBoundary>
         <div className='min-h-screen bg-gray-50'>
-          <div className='flex flex-col items-center pt-8'>
-            <div className='text-center mb-12'>
+          <div className='flex flex-col items-center pt-16'>
+            <div className='text-center mb-6'>
               <img src={logo} alt="fundal-logo" className="w-xs mx-auto" />
             </div>
             <Routes>

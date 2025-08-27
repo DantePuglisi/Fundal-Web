@@ -570,14 +570,14 @@ export function findAllValidCouplings(
     addCompatibleFromSeries(FAD_SERIES, 'FA con Distanciador');
   } else if (forceFAS) {
     // For reductor-application, prioritize FAS series but show all
-    addCompatibleFromSeries(FASNG_SERIES, 'FAS Nueva Generación');
+    addCompatibleFromSeries(FASNG_SERIES, 'FAS NG');
     addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
     addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
     // Note: FA series typically not recommended for reductor-application but can be shown as fallback
   } else {
     // Normal case: show all applicable series
     addCompatibleFromSeries(FA_SERIES, 'FA Estándar');
-    addCompatibleFromSeries(FASNG_SERIES, 'FAS Nueva Generación');
+    addCompatibleFromSeries(FASNG_SERIES, 'FAS NG');
     addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
     addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
     addCompatibleFromSeries(FAC_SERIES, 'FA con Cardán');
@@ -585,10 +585,10 @@ export function findAllValidCouplings(
   
   // Sort options by series preference and then by torque (most economical first)
   const seriesOrder = forceFAS 
-    ? ['FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán']
+    ? ['FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán']
     : rpm < 1500
-      ? ['FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán'] // Prioritize FAS for low RPM
-      : ['FA Estándar', 'FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA con Cardán']; // Normal priority
+      ? ['FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán'] // Prioritize FAS for low RPM
+      : ['FA Estándar', 'FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA con Cardán']; // Normal priority
   
   allOptions.sort((a, b) => {
     const aIndex = seriesOrder.indexOf(a.series);

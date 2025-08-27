@@ -35,7 +35,7 @@ class ErrorBoundary extends Component<Props, State> {
               Ocurrió un error inesperado. Por favor, intenta nuevamente.
             </p>
             <button
-              className="bg-teal-900 hover:bg-teal-800 text-white font-bold py-2 px-6 rounded-full"
+              className="bg-teal-900 hover:bg-teal-800 text-white font-bold py-2 px-6 rounded-full cursor-pointer"
               style={{ fontFamily: 'Poppins' }}
               onClick={() => window.location.reload()}
             >

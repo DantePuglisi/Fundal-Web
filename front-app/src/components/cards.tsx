@@ -26,7 +26,7 @@ function Cards() {
     };
     return (
         <div>
-            <p className='text-gray-600 font-poppins font-bold text-2xl text-center mb-6 mt-[-45px]' style={{ fontFamily: 'Poppins' }}>Seleccione la aplicación</p>
+            <p className='text-gray-600 font-poppins font-bold text-2xl text-center mb-6' style={{ fontFamily: 'Poppins' }}>Seleccione la aplicación</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
                 {serviceFactorData.map((application) => (
                     <div key={application.id} onClick={() => handleCardClick(application.id)}>

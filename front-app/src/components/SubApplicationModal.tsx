@@ -31,7 +31,7 @@ function SubApplicationModal({ application, onClose, onSelect }: Props) {
                         <button 
                             key={index}
                             onClick={() => handleSubApplicationSelect(subApp.name, subApp.serviceFactor)}
-                            className="bg-gray-100 rounded-md py-2 px-4 text-[14px] shadow-lg hover:bg-gray-200 transition"
+                            className="bg-gray-100 rounded-md py-2 px-4 text-[14px] shadow-lg hover:bg-gray-200 transition cursor-pointer"
                             style={{ fontFamily: 'Poppins' }}
                         >
                             {subApp.name} - FS {subApp.serviceFactor.toFixed(2)}
@@ -41,12 +41,12 @@ function SubApplicationModal({ application, onClose, onSelect }: Props) {
                 
                 <div className="flex flex-col sm:flex-row justify-between mt-6 gap-4">
                     <button
-                        className="bg-red-100 text-red-600 font-bold py-2 px-8 rounded-full hover:cursor-pointer"
+                        className="bg-red-100 text-red-600 font-bold py-2 px-8 rounded-full cursor-pointer"
                         onClick={onClose}
                     >
                         Volver
                     </button>
-                    <button className="bg-teal-100 text-teal-900 font-bold py-2 px-8 rounded-full hover:cursor-pointer opacity-50 cursor-not-allowed">
+                    <button className="bg-teal-100 text-teal-900 font-bold py-2 px-8 rounded-full opacity-50 cursor-not-allowed">
                         Seleccione una opción
                     </button>
                 </div>
