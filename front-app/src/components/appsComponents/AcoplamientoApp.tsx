@@ -147,26 +147,26 @@ function AcoplamientoApp() {
                         </div>
                         
                         {resultado.couplingModel && (
-                          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                            <p className="text-blue-700 font-medium text-sm mb-2">Modelo Seleccionado</p>
+                          <div className="rounded-lg p-4 border" style={{backgroundColor: 'rgba(218, 210, 216, 0.3)', borderColor: '#C5BDC4'}}>
+                            <p className="text-gray-800 font-medium text-sm mb-2">Modelo Seleccionado</p>
                             {resultado.couplingCode && (
-                              <p className="text-xl font-bold text-blue-900" style={{ fontFamily: 'Poppins' }}>
+                              <p className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Poppins' }}>
                                 {resultado.couplingCode}
                               </p>
                             )}
                             {resultado.masaType && (
-                              <p className="text-sm font-medium text-blue-700 mt-1" style={{ fontFamily: 'Poppins' }}>
+                              <p className="text-sm font-medium text-gray-800 mt-1" style={{ fontFamily: 'Poppins' }}>
                                 Masa: {resultado.masaType}
                               </p>
                             )}
                             <div className="mt-3 space-y-1 text-sm">
-                              <p className="text-blue-700">
+                              <p className="text-gray-800">
                                 <span className="font-medium">Torque Nominal Equipo:</span> {resultado.calculatedTorqueNm} Nm
                               </p>
-                              <p className="text-blue-700">
+                              <p className="text-gray-800">
                                 <span className="font-medium">Torque Máx Acoplamiento:</span> {resultado.couplingModel.torqueNm} Nm
                               </p>
-                              <p className="text-blue-700">
+                              <p className="text-gray-800">
                                 <span className="font-medium">RPM Máx:</span> {resultado.couplingModel.maxRPM}
                               </p>
                             </div>
@@ -272,26 +272,26 @@ function AcoplamientoApp() {
                       </div>
                       
                       {resultado.couplingModel && (
-                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                          <p className="text-blue-700 font-medium text-sm mb-2">Modelo Seleccionado</p>
+                        <div className="rounded-lg p-4 border" style={{backgroundColor: 'rgba(218, 210, 216, 0.3)', borderColor: '#C5BDC4'}}>
+                          <p className="text-gray-800 font-medium text-sm mb-2">Modelo Seleccionado</p>
                           {resultado.couplingCode && (
-                            <p className="text-xl font-bold text-blue-900" style={{ fontFamily: 'Poppins' }}>
+                            <p className="text-xl font-bold text-gray-900" style={{ fontFamily: 'Poppins' }}>
                               {resultado.couplingCode}
                             </p>
                           )}
                           {resultado.masaType && (
-                            <p className="text-sm font-medium text-blue-700 mt-1" style={{ fontFamily: 'Poppins' }}>
+                            <p className="text-sm font-medium text-gray-800 mt-1" style={{ fontFamily: 'Poppins' }}>
                               Masa: {resultado.masaType}
                             </p>
                           )}
                           <div className="mt-3 space-y-1 text-sm">
-                            <p className="text-blue-700">
+                            <p className="text-gray-800">
                               <span className="font-medium">Torque Nominal Equipo:</span> {resultado.calculatedTorqueNm} Nm
                             </p>
-                            <p className="text-blue-700">
+                            <p className="text-gray-800">
                               <span className="font-medium">Torque Máx Acoplamiento:</span> {resultado.couplingModel.torqueNm} Nm
                             </p>
-                            <p className="text-blue-700">
+                            <p className="text-gray-800">
                               <span className="font-medium">RPM Máx:</span> {resultado.couplingModel.maxRPM}
                             </p>
                           </div>
@@ -562,7 +562,7 @@ function AcoplamientoApp() {
                 
                 window.open(`mailto:ventas@fundaltransmisiones.com.ar?subject=${emailSubject}&body=${encodedEmailBody}`);
               }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2" 
+              className="bg-teal-700 hover:bg-teal-800 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2"
               style={{ fontFamily: 'Poppins' }}
             >
               <img src={getImagePath("/icons/cotizar.png")} alt="Cotizar" className="w-5 h-5" />

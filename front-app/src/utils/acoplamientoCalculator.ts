@@ -187,7 +187,8 @@ function calculateDualCouplings(
     reductorDrivenShaft, // Application shaft (eje_conducido del reductor)
     false, // Second coupling typically doesn't have spacer
     false, // Second coupling typically doesn't have fuse
-    reducedRPM
+    reducedRPM,
+    true // Always use FAS for Reductor-Aplicacion
   );
   
   if (!secondCoupling) {

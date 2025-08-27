@@ -203,87 +203,121 @@ function Form() {
 
                 {/* Service Factor Customization */}
                 {application && applicationData && (
-                    <div className="bg-blue-50 rounded-lg border border-blue-200 p-6 mb-8">
+                    <div className="rounded-xl shadow-lg border border-teal-200 p-6 mb-8 bg-gradient-to-br from-teal-50 to-white">
                         <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                <h3 className="font-bold text-gray-800 text-lg" style={{ fontFamily: 'Poppins' }}>
-                                    Factor de Servicio
-                                </h3>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gradient-to-br from-teal-600 to-teal-700 rounded-lg flex items-center justify-center shadow-md">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-800 text-lg" style={{ fontFamily: 'Poppins' }}>
+                                        Factor de Servicio
+                                    </h3>
+                                    <p className="text-sm text-teal-600 font-medium">Personalice según su aplicación específica</p>
+                                </div>
                             </div>
                             
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-3 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="serviceFactorType"
-                                        checked={!useCustomFS}
-                                        onChange={() => setUseCustomFS(false)}
-                                        className="w-4 h-4 text-blue-600"
-                                    />
-                                    <div className="flex-1">
-                                        <span className="font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
-                                            Usar recomendado ({applicationData.serviceFactor.toFixed(2)})
-                                        </span>
-                                        <p className="text-sm text-gray-500">
-                                            Factor recomendado para {applicationData.subApplication}
-                                        </p>
-                                    </div>
-                                </label>
-                                
-                                <label className="flex items-start gap-3 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="serviceFactorType"
-                                        checked={useCustomFS}
-                                        onChange={() => setUseCustomFS(true)}
-                                        className="w-4 h-4 text-blue-600 mt-1"
-                                    />
-                                    <div className="flex-1">
-                                        <span className="font-medium text-gray-700" style={{ fontFamily: 'Poppins' }}>
-                                            Personalizar
-                                        </span>
-                                        {useCustomFS && (
-                                            <div className="mt-2">
-                                                <input
-                                                    type="number"
-                                                    value={customServiceFactor}
-                                                    onChange={(e) => setCustomServiceFactor(parseFloat(e.target.value) || 1.5)}
-                                                    min="0.5"
-                                                    max="5.0"
-                                                    step="0.1"
-                                                    className="w-24 bg-white border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                                                />
-                                                <span className="ml-2 text-sm text-gray-500">
-                                                    (Entre 0.5 y 5.0)
+                            <div className="space-y-4">
+                                <div className="bg-white rounded-lg border border-teal-100 p-4 hover:border-teal-200 transition-all duration-200">
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="serviceFactorType"
+                                            checked={!useCustomFS}
+                                            onChange={() => setUseCustomFS(false)}
+                                            className="w-5 h-5 text-teal-600 focus:ring-teal-500"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-gray-800" style={{ fontFamily: 'Poppins' }}>
+                                                    Usar recomendado
                                                 </span>
-                                                {customServiceFactor !== applicationData.serviceFactor && (
-                                                    <div className={`mt-2 text-sm ${
-                                                        Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
-                                                            ? 'text-amber-600 bg-amber-50 border border-amber-200' 
-                                                            : 'text-blue-600 bg-blue-50 border border-blue-200'
-                                                    } rounded-lg px-3 py-2`}>
-                                                        {Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
-                                                            ? '⚠️ El FS personalizado difiere significativamente del recomendado' 
-                                                            : '💡 FS personalizado activo'}
-                                                    </div>
-                                                )}
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
+                                                    {applicationData.serviceFactor.toFixed(2)}
+                                                </span>
                                             </div>
-                                        )}
-                                    </div>
-                                </label>
-                            </div>
-                            
-                            <div className="mt-3 p-3 bg-white rounded-lg border border-blue-100">
-                                <p className="text-sm text-gray-600">
-                                    <span className="font-medium">Factor de Servicio Seleccionado:</span>{' '}
-                                    <span className="font-bold text-blue-700">
-                                        {(useCustomFS ? customServiceFactor : applicationData.serviceFactor).toFixed(2)}
-                                    </span>
-                                    {useCustomFS && <span className="text-gray-500 ml-1">(Personalizado)</span>}
-                                </p>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                Factor optimizado para {applicationData.subApplication}
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg border border-teal-100 p-4 hover:border-teal-200 transition-all duration-200">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="serviceFactorType"
+                                            checked={useCustomFS}
+                                            onChange={() => setUseCustomFS(true)}
+                                            className="w-5 h-5 text-teal-600 focus:ring-teal-500 mt-0.5"
+                                        />
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold text-gray-800" style={{ fontFamily: 'Poppins' }}>
+                                                    Personalizar
+                                                </span>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                                    Avanzado
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-gray-600 mt-1">
+                                                Definir factor personalizado basado en condiciones específicas
+                                            </p>
+                                            {useCustomFS && (
+                                                <div className="mt-4 bg-gray-50 rounded-lg p-4 border-l-4 border-orange-400">
+                                                    <div className="space-y-3">
+                                                        <label className="block text-sm font-medium text-gray-700">
+                                                            Factor personalizado:
+                                                        </label>
+                                                        <div className="flex items-center gap-3">
+                                                            <input
+                                                                type="number"
+                                                                value={customServiceFactor}
+                                                                onChange={(e) => setCustomServiceFactor(parseFloat(e.target.value) || 1.5)}
+                                                                min="0.5"
+                                                                max="5.0"
+                                                                step="0.1"
+                                                                className="w-32 bg-white border border-gray-300 rounded-lg px-4 py-3 text-center text-lg font-semibold focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                                                                placeholder="1.50"
+                                                            />
+                                                            <div className="text-sm text-gray-600">
+                                                                <div className="font-medium">Rango: 0.5 - 5.0</div>
+                                                                <div className="text-xs text-gray-500">Increments de 0.1</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {customServiceFactor !== applicationData.serviceFactor && (
+                                                        <div className={`mt-3 text-sm flex items-center gap-2 ${
+                                                            Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
+                                                                ? 'text-amber-700' 
+                                                                : 'text-orange-700'
+                                                        }`}>
+                                                            {Math.abs(customServiceFactor - applicationData.serviceFactor) > applicationData.serviceFactor * 0.5 
+                                                                ? (
+                                                                    <>
+                                                                        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                        <span>Factor muy diferente al recomendado</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <svg className="w-4 h-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                                                        </svg>
+                                                                        <span>Factor personalizado aplicado</span>
+                                                                    </>
+                                                                )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -517,8 +551,8 @@ function Form() {
                     </div>
                     {/* Footer */}
                     <div className="pt-6 border-t border-gray-200">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <p className="text-center text-blue-700 text-sm" style={{ fontFamily: 'Poppins' }}>
+                        <div className="rounded-lg border p-4 mb-6" style={{backgroundColor: '#DAD2D8', borderColor: '#C5BDC4'}}>
+                            <p className="text-center text-gray-800 text-sm" style={{ fontFamily: 'Poppins' }}>
                                 <strong>¿Necesita asistencia?</strong> En caso de que su requerimiento no pueda ser procesado por este sistema, 
                                 comuníquese con nosotros a <a href="mailto:ventas@fundaltransmisiones.com.ar" className="underline font-medium">ventas@fundaltransmisiones.com.ar</a>
                             </p>

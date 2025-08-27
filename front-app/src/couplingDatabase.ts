@@ -350,6 +350,7 @@ function checkMasaCompatibility(
  * @param needsSpacerDBSE - Whether a spacer is required
  * @param needsFusible - Whether fusible protection is required
  * @param rpm - Operating RPM
+ * @param forceFAS - Force FAS series selection (used for Reductor-Aplicacion)
  * @returns The selected coupling model or null if none found
  */
 export function selectCoupling(
@@ -358,7 +359,8 @@ export function selectCoupling(
   conducidoDiameter: number,
   needsSpacerDBSE: boolean = false,
   needsFusible: boolean = false,
-  rpm: number = 1500
+  rpm: number = 1500,
+  forceFAS: boolean = false
 ): CouplingModel | null {
   
   // Helper function to find compatible coupling in a series
@@ -373,8 +375,8 @@ export function selectCoupling(
       const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
       if (masaCheck.isCompatible) {
         // Add masa info to coupling for later use
-        (coupling as any).recommendedMasaType = masaCheck.masaType;
-        (coupling as any).recommendedMasaCode = masaCheck.masaCode;
+        (coupling as CouplingModel & { recommendedMasaType?: string; recommendedMasaCode?: string }).recommendedMasaType = masaCheck.masaType;
+        (coupling as CouplingModel & { recommendedMasaType?: string; recommendedMasaCode?: string }).recommendedMasaCode = masaCheck.masaCode;
         return true;
       }
       return false;
@@ -399,29 +401,53 @@ export function selectCoupling(
     return findCompatibleInSeries(FAD_SERIES);
   }
   
-  // Normal hierarchy: FA -> FAS NG -> FAS NG-H -> FAS NG-LP
-  
-  // 1. Try FA series first (most economical)
-  console.log('Checking FA series...');
-  let result = findCompatibleInSeries(FA_SERIES);
-  if (result) return result;
-  
-  // 2. Try FAS NG series (if FA can't handle it)
-  console.log('Checking FAS NG series...');
-  result = findCompatibleInSeries(FASNG_SERIES);
-  if (result) return result;
-  
-  // 3. Try FAS NG-H series (Heavy Duty variant)
-  result = findCompatibleInSeries(FASNG_H_SERIES);
-  if (result) return result;
-  
-  // 4. Try FAS NG-LP series (Large Power for highest torque requirements)
-  result = findCompatibleInSeries(FASNGLP_SERIES);
-  if (result) return result;
-  
-  // 5. Last resort: try cardan series (FA/C)
-  result = findCompatibleInSeries(FAC_SERIES);
-  if (result) return result;
+  // If forceFAS is true (for Reductor-Aplicacion), prioritize FAS series
+  if (forceFAS) {
+    console.log('Force FAS mode - Checking FAS NG series first...');
+    let result = findCompatibleInSeries(FASNG_SERIES);
+    if (result) return result;
+    
+    // If FAS NG doesn't work, try FAS NG-H
+    result = findCompatibleInSeries(FASNG_H_SERIES);
+    if (result) return result;
+    
+    // If FAS NG-H doesn't work, try FAS NG-LP
+    result = findCompatibleInSeries(FASNGLP_SERIES);
+    if (result) return result;
+    
+    // If no FAS series work, fall back to FA series as last resort
+    console.log('FAS series not suitable, falling back to FA series...');
+    result = findCompatibleInSeries(FA_SERIES);
+    if (result) return result;
+    
+    // Last resort: try cardan series (FA/C)
+    result = findCompatibleInSeries(FAC_SERIES);
+    if (result) return result;
+  } else {
+    // Normal hierarchy: FA -> FAS NG -> FAS NG-H -> FAS NG-LP
+    
+    // 1. Try FA series first (most economical)
+    console.log('Checking FA series...');
+    let result = findCompatibleInSeries(FA_SERIES);
+    if (result) return result;
+    
+    // 2. Try FAS NG series (if FA can't handle it)
+    console.log('Checking FAS NG series...');
+    result = findCompatibleInSeries(FASNG_SERIES);
+    if (result) return result;
+    
+    // 3. Try FAS NG-H series (Heavy Duty variant)
+    result = findCompatibleInSeries(FASNG_H_SERIES);
+    if (result) return result;
+    
+    // 4. Try FAS NG-LP series (Large Power for highest torque requirements)
+    result = findCompatibleInSeries(FASNGLP_SERIES);
+    if (result) return result;
+    
+    // 5. Last resort: try cardan series (FA/C)
+    result = findCompatibleInSeries(FAC_SERIES);
+    if (result) return result;
+  }
   
   // No suitable coupling found
   return null;
