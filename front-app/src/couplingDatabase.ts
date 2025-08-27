@@ -425,15 +425,18 @@ export function selectCoupling(
     if (result) return result;
   } else {
     // Normal hierarchy: FA -> FAS NG -> FAS NG-H -> FAS NG-LP
+    // But below 1500 RPM, skip FA series in recommendations
     
-    // 1. Try FA series first (most economical)
-    console.log('Checking FA series...');
-    let result = findCompatibleInSeries(FA_SERIES);
-    if (result) return result;
+    if (rpm >= 1500) {
+      // 1. Try FA series first (most economical) - only for RPM >= 1500
+      console.log('Checking FA series...');
+      let result = findCompatibleInSeries(FA_SERIES);
+      if (result) return result;
+    }
     
-    // 2. Try FAS NG series (if FA can't handle it)
+    // 2. Try FAS NG series
     console.log('Checking FAS NG series...');
-    result = findCompatibleInSeries(FASNG_SERIES);
+    let result = findCompatibleInSeries(FASNG_SERIES);
     if (result) return result;
     
     // 3. Try FAS NG-H series (Heavy Duty variant)
@@ -451,4 +454,148 @@ export function selectCoupling(
   
   // No suitable coupling found
   return null;
+}
+
+/**
+ * Finds ALL valid coupling options across different series based on requirements
+ * Returns detailed information about each valid option for user selection
+ */
+export interface CouplingOption {
+  model: CouplingModel;
+  factorServicioResultante: number;
+  masaType?: string;
+  masaCode?: string;
+  minShaftDiameter: number;
+  maxShaftDiameter: number;
+  maxRPM: number;
+  maxTorqueNm: number;
+  series: string;
+  couplingCode?: string;
+}
+
+export function findAllValidCouplings(
+  requiredTorqueNm: number,
+  nominalTorqueNm: number, // Equipment nominal torque for FS calculation
+  conductorDiameter: number,
+  conducidoDiameter: number,
+  needsSpacerDBSE: boolean = false,
+  needsFusible: boolean = false,
+  rpm: number = 1500,
+  forceFAS: boolean = false,
+  userDBSE?: string
+): CouplingOption[] {
+  const allOptions: CouplingOption[] = [];
+  
+  // Helper function to process compatible couplings in a series
+  function addCompatibleFromSeries(series: CouplingModel[], seriesName: string) {
+    // Find couplings with adequate torque capacity and RPM
+    const torqueCompatibleCouplings = series.filter(coupling => 
+      coupling.torqueNm >= requiredTorqueNm && rpm <= coupling.maxRPM
+    );
+    
+    // Check compatibility and collect all valid options
+    const validCouplings: Array<{coupling: CouplingModel, masaCheck: any}> = [];
+    
+    torqueCompatibleCouplings.forEach(coupling => {
+      const masaCheck = checkMasaCompatibility(coupling, conductorDiameter, conducidoDiameter);
+      if (masaCheck.isCompatible) {
+        validCouplings.push({ coupling, masaCheck });
+      }
+    });
+    
+    // Sort by torque (most economical first) and take only the first one (most economical)
+    validCouplings.sort((a, b) => a.coupling.torqueNm - b.coupling.torqueNm);
+    
+    // Add only the most economical option for this series
+    if (validCouplings.length > 0) {
+      const { coupling, masaCheck } = validCouplings[0]; // Take the most economical
+      
+      // Calculate resultant service factor
+      const factorServicioResultante = coupling.torqueNm / nominalTorqueNm;
+      
+      // Determine min/max shaft diameters
+      let minShaft = 0;
+      let maxShaft = 0;
+      
+      if (coupling.series === 'FA' || coupling.series === 'FA/D' || coupling.series === 'FA/FUS') {
+        // For FA series, use masa ranges
+        minShaft = Math.min(
+          coupling.masaConvencionalMin || 0,
+          coupling.masaLlenaMin || 0
+        );
+        maxShaft = Math.max(
+          coupling.masaConvencionalMax || 0,
+          coupling.masaLlenaMax || 0
+        );
+      } else {
+        // For other series, use bore diameter
+        minShaft = coupling.boreDiameterMin || 0;
+        maxShaft = coupling.boreDiameterMax || 0;
+      }
+      
+      // Generate coupling code
+      let couplingCode = coupling.model;
+      if (coupling.series === 'FA/FUS') {
+        const modelNumber = coupling.model.match(/\d+/)?.[0];
+        couplingCode = `FA ${modelNumber} / FUS ${masaCheck.masaCode || ''}`;
+      } else if (coupling.series === 'FA/D' && userDBSE) {
+        const modelNumber = coupling.model.match(/\d+/)?.[0];
+        couplingCode = `FA ${modelNumber} / D ${userDBSE} ${masaCheck.masaCode || ''}`;
+      } else if (coupling.series === 'FA') {
+        const modelNumber = coupling.model.match(/\d+/)?.[0];
+        couplingCode = `FA ${modelNumber} ${masaCheck.masaCode || ''}`;
+      }
+      
+      allOptions.push({
+        model: coupling,
+        factorServicioResultante: Math.round(factorServicioResultante * 100) / 100,
+        masaType: masaCheck.masaType,
+        masaCode: masaCheck.masaCode,
+        minShaftDiameter: minShaft,
+        maxShaftDiameter: maxShaft,
+        maxRPM: coupling.maxRPM,
+        maxTorqueNm: coupling.torqueNm,
+        series: seriesName,
+        couplingCode: couplingCode.trim()
+      });
+    }
+  }
+  
+  // Apply restrictions based on configuration
+  if (needsFusible) {
+    // If fusible is required, only FA/FUS series
+    addCompatibleFromSeries(FAFUS_SERIES, 'FA con Fusible');
+  } else if (needsSpacerDBSE) {
+    // If spacer is required, only FA/D series
+    addCompatibleFromSeries(FAD_SERIES, 'FA con Distanciador');
+  } else if (forceFAS) {
+    // For reductor-application, prioritize FAS series but show all
+    addCompatibleFromSeries(FASNG_SERIES, 'FAS Nueva Generación');
+    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
+    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
+    // Note: FA series typically not recommended for reductor-application but can be shown as fallback
+  } else {
+    // Normal case: show all applicable series
+    addCompatibleFromSeries(FA_SERIES, 'FA Estándar');
+    addCompatibleFromSeries(FASNG_SERIES, 'FAS Nueva Generación');
+    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
+    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
+    addCompatibleFromSeries(FAC_SERIES, 'FA con Cardán');
+  }
+  
+  // Sort options by series preference and then by torque (most economical first)
+  const seriesOrder = forceFAS 
+    ? ['FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán']
+    : rpm < 1500
+      ? ['FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán'] // Prioritize FAS for low RPM
+      : ['FA Estándar', 'FAS Nueva Generación', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA con Cardán']; // Normal priority
+  
+  allOptions.sort((a, b) => {
+    const aIndex = seriesOrder.indexOf(a.series);
+    const bIndex = seriesOrder.indexOf(b.series);
+    if (aIndex !== bIndex) return aIndex - bIndex;
+    return a.maxTorqueNm - b.maxTorqueNm; // Within same series, sort by torque
+  });
+  
+  return allOptions;
 }

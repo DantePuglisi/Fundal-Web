@@ -1,8 +1,9 @@
 import type { EspecificacionesForm, DistanciadorForm, ReductorForm } from '../interfaces/all_interfaces';
-import { selectCoupling, type CouplingModel } from '../couplingDatabase';
+import { selectCoupling, type CouplingModel, findAllValidCouplings, type CouplingOption } from '../couplingDatabase';
 import { getImagePath } from './imagePaths';
 
 export interface AcoplamientoResult {
+  // Primary recommendation (for backward compatibility)
   id: number;
   name: string;
   image: string;
@@ -13,6 +14,10 @@ export interface AcoplamientoResult {
   calculatedTorqueNm?: number;
   couplingCode?: string;
   masaType?: string;
+  
+  // All available options for user selection
+  allOptions: CouplingOption[];
+  
   // For dual coupling configuration (reductor)
   secondCoupling?: {
     name: string;
@@ -24,7 +29,15 @@ export interface AcoplamientoResult {
     calculatedTorqueNm?: number;
     couplingCode?: string;
     masaType?: string;
+    allOptions: CouplingOption[]; // All options for second coupling too
   };
+  
+  // Equipment data for reference
+  nominalTorqueNm: number;
+  requiredTorqueNm: number;
+  rpm: number;
+  conductorDiameter: number;
+  conducidoDiameter: number;
 }
 
 export interface FormData {
@@ -74,10 +87,23 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
   
   // Check if reductor is present
   if (especificaciones.reductor && reductor) {
-    return calculateDualCouplings(data, powerHP, rpm, nominalTorqueNm, finalServiceFactor, requiredTorqueNm);
+    return calculateDualCouplings(data, powerHP, rpm, nominalTorqueNm, finalServiceFactor, requiredTorqueNm, conductorDiameter, conducidoDiameter);
   }
   
-  // Standard single coupling calculation
+  // Get ALL valid coupling options
+  const allOptions = findAllValidCouplings(
+    requiredTorqueNm,
+    nominalTorqueNm,
+    conductorDiameter,
+    conducidoDiameter,
+    especificaciones.distanciador,
+    especificaciones.acople,
+    rpm,
+    false, // Not forcing FAS for standard coupling
+    data.distanciador?.dbse
+  );
+  
+  // Standard single coupling calculation (for primary recommendation)
   const selectedCoupling = selectCoupling(
     requiredTorqueNm,
     conductorDiameter,
@@ -87,7 +113,7 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
     rpm
   );
   
-  if (!selectedCoupling) {
+  if (!selectedCoupling && allOptions.length === 0) {
     // No suitable coupling found, return error result
     return {
       id: 0,
@@ -96,31 +122,63 @@ export function calculateAcoplamiento(data: FormData): AcoplamientoResult {
       factorServicio: finalServiceFactor,
       description: "No se encontró un acoplamiento que cumpla con los requisitos especificados. Por favor, verifique los parámetros ingresados.",
       ventajas: [],
-      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      allOptions: [],
+      nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+      requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      rpm: rpm,
+      conductorDiameter: conductorDiameter,
+      conducidoDiameter: conducidoDiameter
+    };
+  }
+  
+  // If we have options but no selected coupling, use the first option
+  const finalSelectedCoupling = selectedCoupling || (allOptions.length > 0 ? allOptions[0].model : null);
+  if (!finalSelectedCoupling) {
+    return {
+      id: 0,
+      name: "Error en la selección",
+      image: getImagePath("/Acoples render/FA.png"),
+      factorServicio: finalServiceFactor,
+      description: "Error al procesar la selección del acoplamiento.",
+      ventajas: [],
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      allOptions: [],
+      nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+      requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      rpm: rpm,
+      conductorDiameter: conductorDiameter,
+      conducidoDiameter: conducidoDiameter
     };
   }
   
   // Step 3: Calculate resultant service factor based on selected coupling
   // FS Resultante = Torque Max Acoplamiento / Torque Nominal Equipo
-  const resultantServiceFactor = selectedCoupling.torqueNm / nominalTorqueNm;
+  const resultantServiceFactor = finalSelectedCoupling.torqueNm / nominalTorqueNm;
   
   // Step 4: Generate coupling code based on catalog format
-  const couplingCode = generateCouplingCode(selectedCoupling, data);
+  const couplingCode = generateCouplingCode(finalSelectedCoupling, data);
   
   // Determine coupling type and characteristics
-  const couplingDetails = getCouplingDetails(selectedCoupling, especificaciones.acople);
+  const couplingDetails = getCouplingDetails(finalSelectedCoupling, especificaciones.acople);
   
   return {
-    id: parseInt(selectedCoupling.model.match(/\d+/)?.[0] || '1'),
-    name: `${couplingDetails.name} - ${selectedCoupling.model}`,
+    id: parseInt(finalSelectedCoupling.model.match(/\d+/)?.[0] || '1'),
+    name: `${couplingDetails.name} - ${finalSelectedCoupling.model}`,
     image: couplingDetails.image,
     factorServicio: Math.round(resultantServiceFactor * 100) / 100, // Resultant service factor based on selected coupling
     description: couplingDetails.description,
     ventajas: couplingDetails.ventajas,
-    couplingModel: selectedCoupling,
+    couplingModel: finalSelectedCoupling,
     calculatedTorqueNm: Math.round(nominalTorqueNm * 10) / 10, // Show nominal torque (equipment torque)
     couplingCode: couplingCode,
-    masaType: (selectedCoupling as { recommendedMasaType?: string }).recommendedMasaType
+    masaType: (finalSelectedCoupling as { recommendedMasaType?: string }).recommendedMasaType,
+    allOptions: allOptions,
+    nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+    requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+    rpm: rpm,
+    conductorDiameter: conductorDiameter,
+    conducidoDiameter: conducidoDiameter
   };
 }
 
@@ -135,7 +193,9 @@ function calculateDualCouplings(
   rpm: number, 
   nominalTorqueNm: number, 
   finalServiceFactor: number, 
-  requiredTorqueNm: number
+  requiredTorqueNm: number,
+  originalConductorDiameter: number,
+  originalConducidoDiameter: number
 ): AcoplamientoResult {
   const { especificaciones, reductor } = data;
   
@@ -153,6 +213,19 @@ function calculateDualCouplings(
   const conducidoDiameter = parseFloat(especificaciones.eje_conducido) || 0;
   
   // First coupling: Motor to Reductor
+  // Get ALL valid coupling options for first coupling
+  const firstCouplingAllOptions = findAllValidCouplings(
+    requiredTorqueNm,
+    nominalTorqueNm,
+    conductorDiameter,
+    conducidoDiameter, // Use original driven shaft diameter, not reductor output
+    especificaciones.distanciador,
+    especificaciones.acople,
+    rpm,
+    false, // Not forcing FAS for first coupling
+    data.distanciador?.dbse
+  );
+  
   // Uses original motor shaft diameters (motor shaft to reductor input shaft)
   const firstCoupling = selectCoupling(
     requiredTorqueNm,
@@ -163,7 +236,7 @@ function calculateDualCouplings(
     rpm
   );
   
-  if (!firstCoupling) {
+  if (!firstCoupling && firstCouplingAllOptions.length === 0) {
     return {
       id: 0,
       name: "No se encontró acoplamiento adecuado para Motor-Reductor",
@@ -171,7 +244,13 @@ function calculateDualCouplings(
       factorServicio: finalServiceFactor,
       description: "No se encontró un acoplamiento que cumpla con los requisitos especificados para la conexión Motor-Reductor.",
       ventajas: [],
-      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      allOptions: [],
+      nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+      requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      rpm: rpm,
+      conductorDiameter: originalConductorDiameter,
+      conducidoDiameter: originalConducidoDiameter
     };
   }
   
@@ -180,6 +259,19 @@ function calculateDualCouplings(
   const reducedRPM = rpm / reductionRatio;
   const increasedTorqueNm = nominalTorqueNm * reductionRatio;
   const requiredTorqueSecond = increasedTorqueNm * finalServiceFactor;
+  
+  // Second coupling: Reductor to Application
+  // Get ALL valid coupling options for second coupling
+  const secondCouplingAllOptions = findAllValidCouplings(
+    requiredTorqueSecond,
+    increasedTorqueNm,
+    reductorOutputShaft, // Reductor output shaft (eje_salida)
+    reductorDrivenShaft, // Application shaft (eje_conducido del reductor)
+    false, // Second coupling typically doesn't have spacer
+    false, // Second coupling typically doesn't have fuse
+    reducedRPM,
+    true // Always use FAS for Reductor-Aplicacion
+  );
   
   const secondCoupling = selectCoupling(
     requiredTorqueSecond,
@@ -191,7 +283,7 @@ function calculateDualCouplings(
     true // Always use FAS for Reductor-Aplicacion
   );
   
-  if (!secondCoupling) {
+  if (!secondCoupling && secondCouplingAllOptions.length === 0) {
     return {
       id: 0,
       name: "No se encontró acoplamiento adecuado para Reductor-Aplicación",
@@ -199,17 +291,45 @@ function calculateDualCouplings(
       factorServicio: finalServiceFactor,
       description: "No se encontró un acoplamiento que cumpla con los requisitos especificados para la conexión Reductor-Aplicación.",
       ventajas: [],
-      calculatedTorqueNm: Math.round(requiredTorqueSecond * 10) / 10
+      calculatedTorqueNm: Math.round(requiredTorqueSecond * 10) / 10,
+      allOptions: [],
+      nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+      requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      rpm: rpm,
+      conductorDiameter: originalConductorDiameter,
+      conducidoDiameter: originalConducidoDiameter
+    };
+  }
+  
+  // Use first available option if no coupling was selected
+  const finalFirstCoupling = firstCoupling || (firstCouplingAllOptions.length > 0 ? firstCouplingAllOptions[0].model : null);
+  const finalSecondCoupling = secondCoupling || (secondCouplingAllOptions.length > 0 ? secondCouplingAllOptions[0].model : null);
+  
+  if (!finalFirstCoupling || !finalSecondCoupling) {
+    return {
+      id: 0,
+      name: "Error en la selección de acoplamientos",
+      image: getImagePath("/Acoples render/FA.png"),
+      factorServicio: finalServiceFactor,
+      description: "Error al procesar la selección de los acoplamientos para configuración dual.",
+      ventajas: [],
+      calculatedTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      allOptions: firstCouplingAllOptions,
+      nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+      requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+      rpm: rpm,
+      conductorDiameter: originalConductorDiameter,
+      conducidoDiameter: originalConducidoDiameter
     };
   }
   
   // Calculate service factors for both couplings
-  const firstResultantSF = firstCoupling.torqueNm / nominalTorqueNm;
-  const secondResultantSF = secondCoupling.torqueNm / increasedTorqueNm;
+  const firstResultantSF = finalFirstCoupling.torqueNm / nominalTorqueNm;
+  const secondResultantSF = finalSecondCoupling.torqueNm / increasedTorqueNm;
   
   // Generate codes for both couplings
-  const firstCouplingCode = generateCouplingCode(firstCoupling, data);
-  const secondCouplingCode = generateCouplingCode(secondCoupling, {
+  const firstCouplingCode = generateCouplingCode(finalFirstCoupling, data);
+  const secondCouplingCode = generateCouplingCode(finalSecondCoupling, {
     ...data,
     especificaciones: {
       ...especificaciones,
@@ -219,12 +339,12 @@ function calculateDualCouplings(
   });
   
   // Get details for both couplings
-  const firstCouplingDetails = getCouplingDetails(firstCoupling, especificaciones.acople);
-  const secondCouplingDetails = getCouplingDetails(secondCoupling, false);
+  const firstCouplingDetails = getCouplingDetails(finalFirstCoupling, especificaciones.acople);
+  const secondCouplingDetails = getCouplingDetails(finalSecondCoupling, false);
   
   return {
-    id: parseInt(firstCoupling.model.match(/\d+/)?.[0] || '1'),
-    name: `${firstCouplingDetails.name} - ${firstCoupling.model} (Motor-Reductor)`,
+    id: parseInt(finalFirstCoupling.model.match(/\d+/)?.[0] || '1'),
+    name: `${firstCouplingDetails.name} - ${finalFirstCoupling.model} (Motor-Reductor)`,
     image: firstCouplingDetails.image,
     factorServicio: Math.round(firstResultantSF * 100) / 100,
     description: `Configuración dual: ${firstCouplingDetails.description} + ${secondCouplingDetails.description}`,
@@ -233,20 +353,27 @@ function calculateDualCouplings(
       "Protección completa del tren de transmisión",
       ...firstCouplingDetails.ventajas.slice(0, 2)
     ],
-    couplingModel: firstCoupling,
+    couplingModel: finalFirstCoupling,
     calculatedTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
     couplingCode: firstCouplingCode,
-    masaType: (firstCoupling as { recommendedMasaType?: string }).recommendedMasaType,
+    masaType: (finalFirstCoupling as { recommendedMasaType?: string }).recommendedMasaType,
+    allOptions: firstCouplingAllOptions,
+    nominalTorqueNm: Math.round(nominalTorqueNm * 10) / 10,
+    requiredTorqueNm: Math.round(requiredTorqueNm * 10) / 10,
+    rpm: rpm,
+    conductorDiameter: originalConductorDiameter,
+    conducidoDiameter: originalConducidoDiameter,
     secondCoupling: {
-      name: `${secondCouplingDetails.name} - ${secondCoupling.model} (Reductor-Aplicación)`,
+      name: `${secondCouplingDetails.name} - ${finalSecondCoupling.model} (Reductor-Aplicación)`,
       image: secondCouplingDetails.image,
       factorServicio: Math.round(secondResultantSF * 100) / 100,
       description: secondCouplingDetails.description,
       ventajas: secondCouplingDetails.ventajas,
-      couplingModel: secondCoupling,
+      couplingModel: finalSecondCoupling,
       calculatedTorqueNm: Math.round(increasedTorqueNm * 10) / 10,
       couplingCode: secondCouplingCode,
-      masaType: (secondCoupling as { recommendedMasaType?: string }).recommendedMasaType
+      masaType: (finalSecondCoupling as { recommendedMasaType?: string }).recommendedMasaType,
+      allOptions: secondCouplingAllOptions
     }
   };
 }

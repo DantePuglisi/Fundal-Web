@@ -15,7 +15,9 @@
   "homepage": "https://dantepuglisi.github.io/Fundal-Web",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
+    "@types/html2canvas": "^0.5.35",
     "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.8.0"

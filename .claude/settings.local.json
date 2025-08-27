@@ -14,7 +14,10 @@
       "Bash(git commit:*)",
       "Bash(cp:*)",
       "Bash(node:*)",
-      "Bash(gh workflow:*)"
+      "Bash(gh workflow:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []

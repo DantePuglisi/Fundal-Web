@@ -2,7 +2,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { calculateAcoplamiento, type AcoplamientoResult, type FormData } from '../../utils/acoplamientoCalculator';
 import { getImagePath } from '../../utils/imagePaths';
-import html2canvas from 'html2canvas';
+import { CouplingOptionsTable } from '../CouplingOptionsTable';
+// import html2canvas from 'html2canvas'; // Removed - now using PDF generator
+import { generateAndDownloadReport, type ReportData } from '../../utils/pdfReportGenerator';
+import { getApplicationById } from '../../serviceFactorData';
 const icons = [
   { icon: getImagePath("/icons/Alta performance.png"), label: "Alta performance" },
   { icon: getImagePath("/icons/Vida util prolongada.png"), label: "Vida útil prolongada" },
@@ -14,6 +17,7 @@ const icons = [
 
 function AcoplamientoApp() {
   const [resultado, setResultado] = useState<AcoplamientoResult | null>(null);
+  const [showAllOptions, setShowAllOptions] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const formData = location.state as FormData;
@@ -108,8 +112,37 @@ function AcoplamientoApp() {
             }
           </p>
         </div>
+        {/* View Toggle Button */}
+        <div className="flex justify-center mb-8">
+          <div className="bg-white rounded-lg shadow-md border p-1 flex">
+            <button
+              onClick={() => setShowAllOptions(false)}
+              className={`px-6 py-2 rounded-md font-medium text-sm transition-colors ${
+                !showAllOptions 
+                  ? 'bg-teal-600 text-white shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Poppins' }}
+            >
+              Recomendación
+            </button>
+            <button
+              onClick={() => setShowAllOptions(true)}
+              className={`px-6 py-2 rounded-md font-medium text-sm transition-colors ${
+                showAllOptions 
+                  ? 'bg-teal-600 text-white shadow-sm' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+              style={{ fontFamily: 'Poppins' }}
+            >
+              Ver todas las opciones
+            </button>
+          </div>
+        </div>
+
         {/* Main Result */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+        <div className={`${showAllOptions ? 'hidden' : 'block'}`}>
+          <div className="grid lg:grid-cols-3 gap-8 mb-12">
           {/* Coupling Showcase */}
           <div className="lg:col-span-2">
             {resultado.secondCoupling ? (
@@ -344,9 +377,51 @@ function AcoplamientoApp() {
             </div>
           </div>
         </div>
+        </div>
+        
+        {/* All Options View */}
+        <div className={`${showAllOptions ? 'block' : 'hidden'} space-y-8 mb-8`}>
+          {resultado.secondCoupling ? (
+            // Dual coupling - show both tables
+            <div className="space-y-8">
+              {/* First Coupling Options */}
+              <CouplingOptionsTable
+                options={resultado.allOptions}
+                title="Opciones - Acoplamiento Motor-Reductor"
+                nominalTorque={resultado.nominalTorqueNm}
+                requiredTorque={resultado.requiredTorqueNm}
+                rpm={resultado.rpm}
+                conductorDiameter={resultado.conductorDiameter}
+                conducidoDiameter={resultado.conducidoDiameter}
+              />
+              
+              {/* Second Coupling Options */}
+              <CouplingOptionsTable
+                options={resultado.secondCoupling.allOptions}
+                title="Opciones - Acoplamiento Reductor-Aplicación"
+                nominalTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.nominalTorqueNm}
+                requiredTorque={resultado.secondCoupling.calculatedTorqueNm || resultado.requiredTorqueNm}
+                rpm={formData?.reductor?.relacion_npm ? resultado.rpm / parseFloat(formData.reductor.relacion_npm) : resultado.rpm}
+                conductorDiameter={formData?.reductor?.eje_salida ? parseFloat(formData.reductor.eje_salida) : resultado.conductorDiameter}
+                conducidoDiameter={formData?.reductor?.eje_conducido ? parseFloat(formData.reductor.eje_conducido) : resultado.conducidoDiameter}
+              />
+            </div>
+          ) : (
+            // Single coupling - show one table
+            <CouplingOptionsTable
+              options={resultado.allOptions}
+              title="Todas las Opciones de Acoplamiento"
+              nominalTorque={resultado.nominalTorqueNm}
+              requiredTorque={resultado.requiredTorqueNm}
+              rpm={resultado.rpm}
+              conductorDiameter={resultado.conductorDiameter}
+              conducidoDiameter={resultado.conducidoDiameter}
+            />
+          )}
+        </div>
         
         {/* Advantages Section */}
-        <div className="bg-gradient-to-br from-teal-50 to-white rounded-xl shadow-lg border border-teal-100 p-8 mb-8">
+        <div className={`${showAllOptions ? 'hidden' : 'block'} bg-gradient-to-br from-teal-50 to-white rounded-xl shadow-lg border border-teal-100 p-8 mb-8`}>
           <div className="text-center mb-10">
             <h3 className="text-2xl font-bold text-gray-800 mb-2" style={{ fontFamily: 'Poppins' }}>
               {resultado.secondCoupling ? 'Ventajas de la Configuración Dual' : 'Ventajas del Acoplamiento Seleccionado'}
@@ -463,40 +538,21 @@ function AcoplamientoApp() {
           <div className="flex flex-wrap justify-center gap-4">
             <button 
               onClick={async () => {
-                if (reportRef.current) {
-                  // Show the report temporarily
-                  reportRef.current.style.display = 'block';
+                try {
+                  // Get application data
+                  const applicationData = formData?.applicationId ? getApplicationById(formData.applicationId) : null;
                   
-                  try {
-                    // Generate canvas from the report
-                    const canvas = await html2canvas(reportRef.current, {
-                      scale: 2,
-                      backgroundColor: '#ffffff',
-                      logging: false,
-                      useCORS: true,
-                      allowTaint: true
-                    });
-                    
-                    // Convert to blob and download
-                    canvas.toBlob((blob) => {
-                      if (blob) {
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `Informe_${resultado.name.replace(/\s+/g, '_')}_${formData?.especificaciones.name_tag_id || 'Equipo'}.png`;
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                      }
-                    }, 'image/png');
-                  } catch (error) {
-                    console.error('Error generating report:', error);
-                    alert('Error al generar el informe. Por favor intente nuevamente.');
-                  } finally {
-                    // Hide the report again
-                    reportRef.current.style.display = 'none';
-                  }
+                  const reportData: ReportData = {
+                    resultado: resultado,
+                    formData: formData!,
+                    applicationName: applicationData?.name,
+                    subApplication: formData?.subApplication
+                  };
+                  
+                  await generateAndDownloadReport(reportData);
+                } catch (error) {
+                  console.error('Error generating PDF report:', error);
+                  alert('Error al generar el informe PDF. Por favor intente nuevamente.');
                 }
               }}
               className="bg-teal-700 hover:bg-teal-800 text-white font-semibold px-6 py-3 rounded-lg transition-colors duration-200 flex items-center gap-2" 

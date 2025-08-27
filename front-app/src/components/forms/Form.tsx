@@ -93,8 +93,8 @@ function Form() {
         
         // Validate custom service factor if used
         if (useCustomFS) {
-            if (customServiceFactor < 0.5 || customServiceFactor > 5.0) {
-                newErrors.push("El Factor de Servicio debe estar entre 0.5 y 5.0");
+            if (customServiceFactor < 1.0) {
+                newErrors.push("El Factor de Servicio debe ser mayor o igual a 1.0");
             }
         }
         
@@ -274,18 +274,39 @@ function Form() {
                                                         </label>
                                                         <div className="flex items-center gap-3">
                                                             <input
-                                                                type="number"
-                                                                value={customServiceFactor}
-                                                                onChange={(e) => setCustomServiceFactor(parseFloat(e.target.value) || 1.5)}
-                                                                min="0.5"
-                                                                max="5.0"
-                                                                step="0.1"
+                                                                type="text"
+                                                                value={customServiceFactor.toString().replace('.', ',')}
+                                                                onChange={(e) => {
+                                                                    let value = e.target.value;
+                                                                    
+                                                                    // Allow only numbers, commas, and dots
+                                                                    value = value.replace(/[^0-9,\.]/g, '');
+                                                                    
+                                                                    // Replace comma with dot for internal processing
+                                                                    const normalizedValue = value.replace(',', '.');
+                                                                    
+                                                                    // Check for valid decimal format (max 2 decimal places)
+                                                                    const decimalRegex = /^\d*\.?\d{0,2}$/;
+                                                                    if (!decimalRegex.test(normalizedValue)) {
+                                                                        return; // Don't update if invalid format
+                                                                    }
+                                                                    
+                                                                    // Convert to number
+                                                                    const numValue = parseFloat(normalizedValue);
+                                                                    
+                                                                    // Update state with valid number or keep current if invalid
+                                                                    if (!isNaN(numValue) && numValue >= 1.0) {
+                                                                        setCustomServiceFactor(numValue);
+                                                                    } else if (normalizedValue === '' || normalizedValue === '.') {
+                                                                        setCustomServiceFactor(1.0);
+                                                                    }
+                                                                }}
                                                                 className="w-32 bg-white border border-gray-300 rounded-lg px-4 py-3 text-center text-lg font-semibold focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
-                                                                placeholder="1.50"
+                                                                placeholder="1,50"
                                                             />
                                                             <div className="text-sm text-gray-600">
-                                                                <div className="font-medium">Rango: 0.5 - 5.0</div>
-                                                                <div className="text-xs text-gray-500">Increments de 0.1</div>
+                                                                <div className="font-medium">Mínimo: 1,0</div>
+                                                                <div className="text-xs text-gray-500">Máx. 2 decimales</div>
                                                             </div>
                                                         </div>
                                                     </div>
