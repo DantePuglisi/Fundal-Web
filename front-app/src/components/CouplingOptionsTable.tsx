@@ -129,7 +129,7 @@ export function CouplingOptionsTable({
                     <div className="bg-gray-50 rounded p-2 text-center">
                       <p className="text-gray-500 font-medium">Torque Máx</p>
                       <p className="font-bold text-gray-800">
-                        {(option.maxTorqueNm / 1000).toFixed(1)}k Nm
+                        {option.maxTorqueNm.toLocaleString('es-ES')} Nm
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded p-2 text-center">

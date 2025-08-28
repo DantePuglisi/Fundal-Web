@@ -220,7 +220,7 @@ function calculateDualCouplings(
     conductorDiameter,
     conducidoDiameter, // Use original driven shaft diameter, not reductor output
     especificaciones.distanciador,
-    especificaciones.acople,
+    false, // Fusible never goes on high-speed (motor-reductor) coupling
     rpm,
     false, // Not forcing FAS for first coupling
     data.distanciador?.dbse
@@ -232,7 +232,7 @@ function calculateDualCouplings(
     conductorDiameter,
     conducidoDiameter, // Use original driven shaft diameter, not reductor output
     especificaciones.distanciador,
-    especificaciones.acople,
+    false, // Fusible never goes on high-speed (motor-reductor) coupling
     rpm
   );
   
@@ -268,7 +268,7 @@ function calculateDualCouplings(
     reductorOutputShaft, // Reductor output shaft (eje_salida)
     reductorDrivenShaft, // Application shaft (eje_conducido del reductor)
     false, // Second coupling typically doesn't have spacer
-    false, // Second coupling typically doesn't have fuse
+    especificaciones.acople, // Fusible always goes on low-speed (reductor-application) coupling
     reducedRPM,
     true // Always use FAS for Reductor-Aplicacion
   );
@@ -278,7 +278,7 @@ function calculateDualCouplings(
     reductorOutputShaft, // Reductor output shaft (eje_salida)
     reductorDrivenShaft, // Application shaft (eje_conducido del reductor)
     false, // Second coupling typically doesn't have spacer
-    false, // Second coupling typically doesn't have fuse
+    especificaciones.acople, // Fusible always goes on low-speed (reductor-application) coupling
     reducedRPM,
     true // Always use FAS for Reductor-Aplicacion
   );
@@ -328,19 +328,25 @@ function calculateDualCouplings(
   const secondResultantSF = finalSecondCoupling.torqueNm / increasedTorqueNm;
   
   // Generate codes for both couplings
-  const firstCouplingCode = generateCouplingCode(finalFirstCoupling, data);
+  const firstCouplingCode = generateCouplingCode(finalFirstCoupling, {
+    ...data,
+    especificaciones: {
+      ...especificaciones,
+      acople: false // Fusible never goes on high-speed coupling
+    }
+  });
   const secondCouplingCode = generateCouplingCode(finalSecondCoupling, {
     ...data,
     especificaciones: {
       ...especificaciones,
       distanciador: false,
-      acople: false
+      acople: especificaciones.acople // Fusible goes on low-speed coupling
     }
   });
   
   // Get details for both couplings
-  const firstCouplingDetails = getCouplingDetails(finalFirstCoupling, especificaciones.acople);
-  const secondCouplingDetails = getCouplingDetails(finalSecondCoupling, false);
+  const firstCouplingDetails = getCouplingDetails(finalFirstCoupling, false); // High-speed coupling never has fusible
+  const secondCouplingDetails = getCouplingDetails(finalSecondCoupling, especificaciones.acople); // Low-speed coupling gets fusible
   
   return {
     id: parseInt(finalFirstCoupling.model.match(/\d+/)?.[0] || '1'),
