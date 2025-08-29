@@ -15,16 +15,18 @@ function getCouplingImage(series: string): string {
     case 'FA con Cardán':
       return getImagePath("/Acoples render/FA-C.png");
     case 'FA/FUS':
+    case 'FA con Fusible':
       return getImagePath("/Acoples render/FA-FUS.png");
     case 'FAS NG-H':
-    case 'FAS NG Heavy Duty':
+    case 'FAS NG Híbrido':
       return getImagePath("/Acoples render/FAS-NG-H.png");
     case 'FAS NG':
       return getImagePath("/Acoples render/FAS-NG.png");
     case 'FAS NG-LP/FUS':
+    case 'FAS NG Línea Pesada con Fusible':
       return getImagePath("/Acoples render/FAS-NG-LP-FUS.png");
     case 'FAS NG-LP':
-    case 'FAS NG Large Power':
+    case 'FAS NG Línea Pesada':
       return getImagePath("/Acoples render/FAS-NG-LP.png");
     default:
       return getImagePath("/Acoples render/FA.png");

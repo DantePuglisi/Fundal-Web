@@ -229,7 +229,7 @@ export const FASNG_SERIES: CouplingModel[] = [
   { model: "FAS NG 18", series: "FAS NG", torqueNm: 400000, maxRPM: 810, boreDiameterMin: 160, boreDiameterMax: 320 }
 ];
 
-// FAS NG H Series - Heavy Duty (Based on FUNDAL catalog table)
+// FAS NG H Series - Híbrido (Based on FUNDAL catalog table)
 export const FASNG_H_SERIES: CouplingModel[] = [
   { model: "FAS NG 7 -H", series: "FAS NG-H", torqueNm: 6300, maxRPM: 2200, boreDiameterMin: 40, boreDiameterMax: 90 },
   { model: "FAS NG 8 -H", series: "FAS NG-H", torqueNm: 7800, maxRPM: 2000, boreDiameterMin: 40, boreDiameterMax: 100 },
@@ -243,7 +243,7 @@ export const FASNG_H_SERIES: CouplingModel[] = [
   { model: "FAS NG 18 -H", series: "FAS NG-H", torqueNm: 400000, maxRPM: 810, boreDiameterMin: 180, boreDiameterMax: 330 }
 ];
 
-// FAS NG LP Series - Large Power (Based on FUNDAL catalog table)
+// FAS NG LP Series - Línea Pesada (Based on FUNDAL catalog table)
 export const FASNGLP_SERIES: CouplingModel[] = [
   { model: "FAS NG 7 LP", series: "FAS NG-LP", torqueNm: 8400, maxRPM: 2200, boreDiameterMin: 40, boreDiameterMax: 90 },
   { model: "FAS NG 8 LP", series: "FAS NG-LP", torqueNm: 11500, maxRPM: 2000, boreDiameterMin: 40, boreDiameterMax: 100 },
@@ -439,11 +439,11 @@ export function selectCoupling(
     let result = findCompatibleInSeries(FASNG_SERIES);
     if (result) return result;
     
-    // 3. Try FAS NG-H series (Heavy Duty variant)
+    // 3. Try FAS NG-H series (Híbrido variant)
     result = findCompatibleInSeries(FASNG_H_SERIES);
     if (result) return result;
     
-    // 4. Try FAS NG-LP series (Large Power for highest torque requirements)
+    // 4. Try FAS NG-LP series (Línea Pesada for highest torque requirements)
     result = findCompatibleInSeries(FASNGLP_SERIES);
     if (result) return result;
     
@@ -571,24 +571,24 @@ export function findAllValidCouplings(
   } else if (forceFAS) {
     // For reductor-application, prioritize FAS series but show all
     addCompatibleFromSeries(FASNG_SERIES, 'FAS NG');
-    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
-    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
+    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Híbrido');
+    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Línea Pesada');
     // Note: FA series typically not recommended for reductor-application but can be shown as fallback
   } else {
     // Normal case: show all applicable series
     addCompatibleFromSeries(FA_SERIES, 'FA Estándar');
     addCompatibleFromSeries(FASNG_SERIES, 'FAS NG');
-    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Heavy Duty');
-    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Large Power');
+    addCompatibleFromSeries(FASNG_H_SERIES, 'FAS NG Híbrido');
+    addCompatibleFromSeries(FASNGLP_SERIES, 'FAS NG Línea Pesada');
     addCompatibleFromSeries(FAC_SERIES, 'FA con Cardán');
   }
   
   // Sort options by series preference and then by torque (most economical first)
   const seriesOrder = forceFAS 
-    ? ['FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán']
+    ? ['FAS NG', 'FAS NG Híbrido', 'FAS NG Línea Pesada', 'FA Estándar', 'FA con Cardán']
     : rpm < 1500
-      ? ['FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA Estándar', 'FA con Cardán'] // Prioritize FAS for low RPM
-      : ['FA Estándar', 'FAS NG', 'FAS NG Heavy Duty', 'FAS NG Large Power', 'FA con Cardán']; // Normal priority
+      ? ['FAS NG', 'FAS NG Híbrido', 'FAS NG Línea Pesada', 'FA Estándar', 'FA con Cardán'] // Prioritize FAS for low RPM
+      : ['FA Estándar', 'FAS NG', 'FAS NG Híbrido', 'FAS NG Línea Pesada', 'FA con Cardán']; // Normal priority
   
   allOptions.sort((a, b) => {
     const aIndex = seriesOrder.indexOf(a.series);

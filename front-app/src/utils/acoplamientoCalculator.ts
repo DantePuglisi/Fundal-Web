@@ -572,7 +572,7 @@ function getCouplingDetails(coupling: CouplingModel, hasFuse: boolean): {
     case 'FAS NG':
       if (coupling.torqueNm > 50000) {
         return {
-          name: "Acoplamiento FAS NG Heavy Duty",
+          name: "Acoplamiento FAS NG Híbrido",
           image: getImagePath("/Acoples render/FAS-NG-H.png"),
           description: "Acoplamiento FUNDAL FAS NG de nueva generación para aplicaciones de alta potencia.",
           ventajas: [
